@@ -1,11 +1,9 @@
 const { runRequest } = require('../common/request_wrapper');
 const { tables } = require('../common/constants');
-const { now } = require('../utils/date');
 const { knex } = require('../common/request_wrapper');
 const { v4 } = require('uuid');
 
 const getUser = async(req, context) => runRequest(req, context, async(_, __) => {
-    // get userid from params
     const { user_id } = req.pathParameters;
     const result = await knex(tables.users)
         .where('id', user_id)

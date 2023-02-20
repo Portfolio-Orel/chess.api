@@ -58,6 +58,21 @@ functions:
           method: post
 
   ## Users ##
+
+  ## Events ##
+  get_event:
+    handler: src/api/events.getEvent
+    events:
+      - httpApi:
+          path: /events/{event_id}
+          method: get
+  create_event:
+    handler: src/api/events.createEvent
+    events:
+      - httpApi:
+          path: /events
+          method: post
+  ## Events ##
   
 resources:
   Resources:

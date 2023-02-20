@@ -11,5 +11,5 @@ exports.up = function(knex) {
  * @returns { Promise<void> }
  */
 exports.down = function(knex) {
-    return knex.raw('DROP EXTENSION IF EXISTS "uuid-ossp"');
+    // return knex.raw('DROP EXTENSION IF EXISTS "uuid-ossp"');
 };
