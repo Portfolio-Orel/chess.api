@@ -1,0 +1,24 @@
+{
+    "name": "chess.api",
+    "version": "1.0.0",
+    "description": "API for the chess app, using serverless framework",
+    "main": "index.ts",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "aws-lambda": "^1.0.7",
+        "dotenv": "^16.0.3",
+        "knex": "^2.2.0",
+        "pg": "^8.9.0",
+        "reflect-metadata": "^0.1.13",
+        "serverless-http": "^3.1.1",
+        "typescript": "^4.9.5",
+        "uuid": "^9.0.0"
+    },
+    "devDependencies": {
+        "serverless-offline": "^12.0.4"
+    }
+}

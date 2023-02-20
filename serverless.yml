@@ -1,0 +1,77 @@
+service: chess-api
+frameworkVersion: "3"
+
+custom:
+  myStage: ${opt:stage, self:provider.stage}
+  myProfile: 
+    prod: ChessApp
+    dev: ChessApp
+  
+  secrets:
+    prod: ${file(secrets_dev.json)}
+    dev: ${file(secrets_dev.json)}
+  
+  serverless-offline:
+    httpPort: 4000
+    websocketPort: 4001
+    lambdaPort: 4002
+  
+  DB_NAME: ${file(./secrets_${self:custom.myStage}.json):DB_NAME}
+  USERNAME: ${file(./secrets_${self:custom.myStage}.json):DB_USERNAME}
+  PASSWORD: ${file(./secrets_${self:custom.myStage}.json):DB_PASSWORD}
+  POSTGRESQL:
+    HOST:
+      Fn::GetAtt: [PostgreSqlRDSInstance, Endpoint.Address]
+    PORT:
+      Fn::GetAtt: [PostgreSqlRDSInstance, Endpoint.Port]
+
+provider:
+  name: aws
+  stage: dev
+  runtime: nodejs16.x
+  profile: ${self:custom.myProfile.${self:custom.myStage}}
+
+  iam:
+    role: LambdaRole
+
+  environment:
+    DB_NAME: ${self:custom.secrets.${self:custom.myStage}.DB_NAME}
+    DB_USERNAME: ${self:custom.secrets.${self:custom.myStage}.DB_USERNAME}
+    DB_PASSWORD: ${self:custom.secrets.${self:custom.myStage}.DB_PASSWORD}
+    DB_HOST: ${self:custom.secrets.${self:custom.myStage}.DB_HOST}
+    DB_PORT: ${self:custom.secrets.${self:custom.myStage}.DB_PORT}
+
+functions:
+  ## Users ##
+  get_user:
+    handler: src/api/users.getUser
+    events:
+      - httpApi:
+          path: /users
+          method: get
+
+  create_user:
+    handler: src/api/users.createUser
+    events:
+      - httpApi:
+          path: /users
+          method: post
+
+  ## Users ##
+  
+resources:
+  Resources:
+    LambdaRole: ${file(./resource/LambdaRole.yml)}
+    PostgreSqlRDSInstance:
+      Type: AWS::RDS::DBInstance
+      Properties:
+        MasterUsername: ${self:custom.USERNAME}
+        MasterUserPassword: ${self:custom.PASSWORD}
+        AllocatedStorage: 20
+        DBName: ${self:custom.DB_NAME}
+        DBInstanceClass: db.t3.micro
+        Engine: postgres
+        PubliclyAccessible: true
+
+plugins:
+  - serverless-offline
