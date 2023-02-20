@@ -15,10 +15,11 @@ const knex = require('knex')({
 });
 
 const runRequest = async(req, context, request) => {
+    let result = {};
     try {
-        // const user_id = resolveUserId(req);
+        const user_id = resolveUserId(req);
         context.callbackWaitsForEmptyEventLoop = false;
-        const result = await request(req);
+        result = await request(req);
         return {
             statusCode: 200,
             body: JSON.stringify({
@@ -54,19 +55,15 @@ const runRequestCallback = async(req, context, request) => {
 }
 
 const resolveUserId = (req) => {
-    const { UserId } = req.headers;
-    const { userid } = req.headers
-    if (!UserId && !userid) {
-        throw Error('Did you add UserId to the headers?');
+    const { userid } = req.headers;
+    if (!userid) {
+        throw Error('Did you add userid to the headers?');
     }
     const regexExpUUID = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
-    if (regexExpUUID.test(UserId)) {
-        return UserId;
-    } else if (regexExpUUID.test(userid)) {
+    if (regexExpUUID.test(userid)) {
         return userid;
-
     } else {
-        throw Error('userId is not a uuid.');
+        throw Error('userid is not a uuid.');
     }
 };
 

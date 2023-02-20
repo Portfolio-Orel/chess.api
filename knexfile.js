@@ -7,10 +7,10 @@ module.exports = {
         client: 'postgresql',
         connection: {
             database: process.env.DB_NAME,
-            user: process.env.USERNAME,
-            password: process.env.PASSWORD,
-            host: process.env.HOST,
-            port: process.env.PORT,
+            user: process.env.DB_USERNAME,
+            password: process.env.DB_PASSWORD,
+            host: process.env.DB_HOST,
+            port: process.env.DB_PORT,
         },
         migrations: {
             directory: './migrations',
@@ -22,10 +22,10 @@ module.exports = {
         client: 'postgresql',
         connection: {
             database: process.env.DB_NAME,
-            user: process.env.USERNAME,
-            password: process.env.PASSWORD,
-            host: process.env.HOST,
-            port: process.env.PORT,
+            user: process.env.DB_USERNAME,
+            password: process.env.DB_PASSWORD,
+            host: process.env.DB_HOST,
+            port: process.env.DB_PORT,
         },
         migrations: {
             directory: './migrations',
