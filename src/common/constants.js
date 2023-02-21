@@ -1,13 +1,16 @@
+require('dotenv').config()
+
 const tables = {
     users: 'users',
     events: 'events',
 };
 
 const urls = {
-    get_event: 'https://private-anon-7fcbac2f82-greeninvoice.apiary-mock.com/api/v1/items/',
-    create_event: 'https://private-anon-a9934b1f61-greeninvoice.apiary-mock.com/api/v1/items/',
-    update_event: 'https://private-anon-7fcbac2f82-greeninvoice.apiary-mock.com/api/v1/items/',
-    delete_event: 'https://private-anon-7fcbac2f82-greeninvoice.apiary-mock.com/api/v1/items/',
+    get_token: `${process.env.BASE_URL}/account/token`,
+    get_event: `${process.env.BASE_URL}/items/`,
+    create_event: `${process.env.BASE_URL}/items/`,
+    update_event: `${process.env.BASE_URL}/items/`,
+    delete_event: `${process.env.BASE_URL}/items/`,
 }
 
 module.exports = {

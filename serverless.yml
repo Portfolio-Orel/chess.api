@@ -72,6 +72,18 @@ functions:
       - httpApi:
           path: /events
           method: post
+  update_event:
+    handler: src/api/events.updateEvent
+    events:
+      - httpApi:
+          path: /events/{event_id}
+          method: put
+  delete_event:
+    handler: src/api/events.deleteEvent
+    events:
+      - httpApi:
+          path: /events/{event_id}
+          method: delete
   ## Events ##
   
 resources:
