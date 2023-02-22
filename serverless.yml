@@ -50,6 +50,20 @@ functions:
           path: /users/{user_id}
           method: get
 
+  get_user_by_email:
+    handler: src/api/users.getUserByEmail
+    events:
+      - httpApi:
+          path: /users/email/{email}
+          method: get
+      
+  get_user_by_phone_number:
+    handler: src/api/users.getUserByPhoneNumber
+    events:
+      - httpApi:
+          path: /users/phone_number/{phone_number}
+          method: get
+
   create_user:
     handler: src/api/users.createUser
     events:
@@ -66,6 +80,13 @@ functions:
       - httpApi:
           path: /events/{event_id}
           method: get
+  get_all_events:
+    handler: src/api/events.getAllEvents
+    events:
+      - httpApi:
+          path: /events
+          method: get
+  
   create_event:
     handler: src/api/events.createEvent
     events:
@@ -85,7 +106,58 @@ functions:
           path: /events/{event_id}
           method: delete
   ## Events ##
+
+  ## Events Participants ##
+  get_event_participant:
+    handler: src/api/events_participants.getEventParticipant
+    events:
+      - httpApi:
+          path: /events/{event_id}/participants/{participant_id}
+          method: get
+
+  get_all_event_participants:
+    handler: src/api/events_participants.getAllEventParticipants
+    events:
+      - httpApi:
+          path: /events/{event_id}/participants
+          method: get
+  add_event_participants:
+    handler: src/api/events_participants.addEventParticipants
+    events:
+      - httpApi:
+          path: /events/{event_id}/participants
+          method: post
+  delete_event_participant:
+    handler: src/api/events_participants.deleteEventParticipant
+    events:
+      - httpApi:
+          path: /events/{event_id}/participants/{participant_id}
+          method: delete
+  ## Events Participants ##
   
+  ## Chess User Data ##
+  get_chess_user_data:
+    handler: src/api/chess_user_data.getChessUserData
+    events:
+      - httpApi:
+          path: /chess_user_data/{user_id}
+          method: get
+
+  create_chess_user_data:
+    handler: src/api/chess_user_data.createChessUserData
+    events:
+      - httpApi:
+          path: /chess_user_data
+          method: post
+
+  update_chess_user_data:
+    handler: src/api/chess_user_data.updateChessUserData
+    events:
+      - httpApi:
+          path: /chess_user_data/{user_id}
+          method: put
+  ## Chess User Data ##
+
 resources:
   Resources:
     LambdaRole: ${file(./resource/LambdaRole.yml)}

@@ -33,12 +33,20 @@ const getToken = async() => {
     return data ? data.token : "";
 }
 
+const getAllEvents = async(req, context) =>
+    runRequest(req, context, async(_, __) => {
+        const token = await getToken();
+        const result = await axios.get(urls.get_all_events, getHeaders(token));
+        const { data } = result;
+        return data ? data : {};
+    });
+
 const getEvent = async(req, context) =>
     runRequest(req, context, async(_, __) => {
         const token = await getToken();
         const { event_id } = req.pathParameters;
         const url = urls.get_event + event_id;
-        const result = await axios.get(url, getHeaders());
+        const result = await axios.get(url, getHeaders(token));
         const { data } = result;
         return data ? data : {};
     });
@@ -61,12 +69,12 @@ const createEvent = (req, context) =>
         min_rating = min_rating ? min_rating : 0;
         max_rating = max_rating ? max_rating : 3500;
 
-        const result = await axios.post('https://private-anon-a9934b1f61-greeninvoice.apiary-mock.com/api/v1/items', {
+        const result = await axios.post(urls.create_event, {
             name,
             description,
             price,
             currency,
-        }, getHeaders());
+        }, getHeaders(token));
         const { data } = result;
         if (data) {
             await knex(tables.events)
@@ -143,4 +151,5 @@ module.exports = {
     createEvent,
     updateEvent,
     deleteEvent,
+    getAllEvents
 };

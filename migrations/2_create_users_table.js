@@ -13,6 +13,7 @@ exports.up = function(knex) {
         table.string('email').unique();
         table.string('phone_number').notNullable().unique();
         table.string('player_number').unique();
+        table.timestamp('date_of_birth');
         table.boolean('is_active').defaultTo(true);
         table.timestamp('created_at').defaultTo(knex.fn.now());
         table.timestamp('updated_at').defaultTo(knex.fn.now());
@@ -24,5 +25,5 @@ exports.up = function(knex) {
  * @returns { Promise<void> }
  */
 exports.down = function(knex) {
-    // return knex.schema.dropTable(tables.users);
+    return knex.schema.dropTable(tables.users);
 };
