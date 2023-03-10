@@ -14,17 +14,19 @@ const knex = require('knex')({
     }
 });
 
-const runRequest = async(req, context, request) => {
+const runRequest = async(req, context, request, check_user_id = true) => {
     let result = {};
     try {
-        const user_id = resolveUserId(req);
+        let user_id = null;
+        if (check_user_id) {
+            user_id = resolveUserId(req);
+        }
         context.callbackWaitsForEmptyEventLoop = false;
-        result = await request(req);
+        req.body = JSON.parse(req.body ? req.body : "{}");
+        result = await request(req, user_id);
         return {
             statusCode: 200,
-            body: JSON.stringify({
-                body: result ? result : {}
-            }),
+            body: JSON.stringify(result ? result : {}),
         };
     } catch (error) {
         console.log(error);

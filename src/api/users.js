@@ -7,9 +7,19 @@ const getUser = async(req, context) => runRequest(req, context, async(_, __) => 
     const { user_id } = req.pathParameters;
     const result = await knex(tables.users)
         .where('id', user_id)
-        .where('is_active', true);
-    return result;
-});
+        .where('is_active', true)
+        .first();
+    return result ? {
+        id: result.id,
+        first_name: result.first_name,
+        last_name: result.last_name,
+        gender: result.gender,
+        email: result.email,
+        phone_number: result.phone_number,
+        player_number: result.player_number,
+        date_of_birth: result.date_of_birth,
+    } : null;
+}, false);
 
 const getUserByEmail = async(req, context) => runRequest(req, context, async(_, __) => {
     const { email } = req.pathParameters;
@@ -28,11 +38,10 @@ const getUserByPhoneNumber = async(req, context) => runRequest(req, context, asy
 });
 
 const createUser = (req, context) => runRequest(req, context, async(req, _) => {
-    const { first_name, last_name, gender, email, phone_number } = JSON.parse(req.body);
-    const user_id = v4();
+    const { first_name, last_name, gender, email, phone_number, user_id } = req.body;
     await knex(tables.users)
         .insert({
-            id: user_id,
+            id: user_id ? user_id : v4(),
             first_name,
             last_name,
             gender,
@@ -42,7 +51,7 @@ const createUser = (req, context) => runRequest(req, context, async(req, _) => {
         .onConflict(['id'])
         .ignore();
     return user_id;
-});
+}, false);
 
 module.exports = {
     getUser,

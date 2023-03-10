@@ -7,7 +7,7 @@ const { tables } = require('../src/common/constants');
 exports.up = function(knex) {
     // an event_participants table that includes a foreign key to the events table and the users table which are also the primary keys of their respective tables
     return knex.schema.createTable(tables.club_details, function(table) {
-        table.uuid('id').primary();
+        table.uuid('id').primary().defaultTo(knex.raw('uuid_generate_v4()'));
         table.string('address');
         table.string('phone_number');
         table.string('email');

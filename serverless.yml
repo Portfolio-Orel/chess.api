@@ -30,6 +30,7 @@ provider:
   stage: dev
   runtime: nodejs16.x
   profile: ${self:custom.myProfile.${self:custom.myStage}}
+  timeout: 3000
 
   iam:
     role: LambdaRole
@@ -105,6 +106,20 @@ functions:
       - httpApi:
           path: /events/{event_id}
           method: delete
+
+  register_to_event:
+    handler: src/api/events.registerToEvent
+    events:
+      - httpApi:
+          path: /events/{event_id}/register
+          method: post
+          
+  get_payment_form:
+    handler: src/api/events.getPaymentForm
+    events:
+      - httpApi:
+          path: /events/{event_id}/payments/form
+          method: get
   ## Events ##
 
   ## Events Participants ##
@@ -116,11 +131,12 @@ functions:
           method: get
 
   get_all_event_participants:
-    handler: src/api/events_participants.getAllEventParticipants
+    handler: src/api/events_participants.getEventParticipants
     events:
       - httpApi:
-          path: /events/{event_id}/participants
+          path: /events/{event_id}/participants/{page_number}/{page_size}
           method: get
+
   add_event_participants:
     handler: src/api/events_participants.addEventParticipants
     events:
@@ -158,8 +174,75 @@ functions:
           method: put
   ## Chess User Data ##
 
+  ## Games ##
+  get_games:
+    handler: src/api/games.getGames
+    events:
+      - httpApi:
+          path: /games
+          method: get
+  create_game:
+    handler: src/api/games.createGame
+    events:
+      - httpApi:
+          path: /games
+          method: post
+  delete_game:
+    handler: src/api/games.deleteGame
+    events:
+      - httpApi:
+          path: /games/{game_id}
+          method: delete
+  ## Games ##
+
+  ## Auth ##
+  createAuthChallenge:
+    handler: src/api/auth.createAuthChallenge
+    events:
+      - httpApi:
+          path: /auth/create_auth_challenge
+          method: post
+
+  defineAuthChallenge:
+    handler: src/api/auth.defineAuthChallenge
+    events:
+      - httpApi:
+          path: /auth/define_auth_challenge
+          method: post
+
+  verifyAuthChallengeResponse:
+    handler: src/api/auth.verifyAuthChallengeResponse
+    events:
+      - httpApi:
+          path: /auth/verify_auth_challenge_response
+          method: post
+  ## Auth ##
+
 resources:
   Resources:
+    sendSMSRole: 
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: sendSMSRole
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action:
+                - sts:AssumeRole
+        Policies:
+          - PolicyName: sendSMSRolePolicy
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - "sns:Publish"
+                  Resource:
+                    - "arn:aws:sns:*:*:*"
     LambdaRole: ${file(./resource/LambdaRole.yml)}
     PostgreSqlRDSInstance:
       Type: AWS::RDS::DBInstance
