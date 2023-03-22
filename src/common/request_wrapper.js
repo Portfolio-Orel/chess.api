@@ -24,6 +24,7 @@ const runRequest = async(req, context, request, check_user_id = true) => {
         context.callbackWaitsForEmptyEventLoop = false;
         req.body = JSON.parse(req.body ? req.body : "{}");
         result = await request(req, user_id);
+        console.log(result);
         return {
             statusCode: 200,
             body: JSON.stringify(result ? result : {}),

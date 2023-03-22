@@ -27,6 +27,20 @@ const validatePageSize = (page_size) => {
     return page_size;
 }
 
+const getRelatedEvents = async(event_id) => {
+    const event_details = await knex(tables.events)
+        .select("*")
+        .where({ id: event_id, is_active: true });
+    if (event_details.length === 0) {
+        throw new Error("No related events found");
+    }
+    const related_events = await knex(tables.events)
+        .select("*")
+        .where({ name: event_details[0].name, is_active: true });
+    return related_events;
+}
+
+
 const getEventParticipant = async(req, context) => runRequest(req, context, async(_, __) => {
     const { event_id, participant_id } = req.pathParameters;
 
@@ -53,11 +67,20 @@ const getEventParticipants = async(req, context) => runRequest(req, context, asy
     return eventParticipants;
 });
 
+const getAllEventsParticipants = async(req, context) => runRequest(req, context, async(_, __) => {
+    const { ids } = req.queryStringParameters;
+    const event_ids_array = ids.split(",");
+    const eventParticipants = await knex(tables.events_participants)
+        .select("*")
+        .whereIn("event_id", event_ids_array);
+    return eventParticipants;
+});
+
 const addEventParticipants = async(req, context) => runRequest(req, context, async(_, __) => {
     const { event_id } = req.pathParameters;
-    const participants = req.body;
+    let participants = req.body;
     if (Array.isArray(participants) === false) {
-        throw new Error("participants must be an array");
+        participants = [participants];
     }
     if (participants.length === 0) {
         return [];
@@ -69,16 +92,7 @@ const addEventParticipants = async(req, context) => runRequest(req, context, asy
         ))
     );
 
-    const event_details = await knex(tables.events)
-        .select("*")
-        .where({ id: event_id, is_active: true });
-    if (event_details.length === 0) {
-        throw new Error("event not found");
-    }
-
-    const related_events = await knex(tables.events)
-        .select("*")
-        .where({ name: event_details[0].name, is_active: true });
+    const related_events = await getRelatedEvents(event_id);
 
     const new_participants = [];
     for (let i = 0; i < related_events.length; i++) {
@@ -97,25 +111,33 @@ const addEventParticipants = async(req, context) => runRequest(req, context, asy
         }
     }
 
-    const eventParticipant = await knex(tables.events_participants)
+    const event_participants = await knex(tables.events_participants)
         .insert(new_participants)
-        .returning("id");
+        .onConflict(["event_id", "user_id"])
+        .merge({ is_active: true })
+        .returning("*");
 
-    return eventParticipant;
+    return event_participants;
 });
 
-const deleteEventParticipant = async(req, context) => runRequest(req, context, async(_, __) => {
-    const { event_id, user_id } = req.params;
-    const eventParticipant = await knex(tables.events_participants)
+const deleteEventParticipants = async(req, context) => runRequest(req, context, async(_, user_id) => {
+    const { ids } = req.queryStringParameters;
+    const { event_id } = req.pathParameters;
+    const event_participants_ids_array = ids.split(",");
+    const related_events = await getRelatedEvents(event_id);
+
+    const eventParticipants = await knex(tables.events_participants)
         .update({ is_active: false, updated_at: now() })
-        .where({ event_id, user_id })
-    return eventParticipant;
+        .whereIn("event_id", related_events.map((event) => event.id))
+        .whereIn("user_id", event_participants_ids_array)
+        .returning("*");
+    return eventParticipants;
 });
 
 module.exports = {
     getEventParticipant,
     getEventParticipants,
+    getAllEventsParticipants,
     addEventParticipants,
-    deleteEventParticipant,
-    getAllEventsParticipants
+    deleteEventParticipants,
 }

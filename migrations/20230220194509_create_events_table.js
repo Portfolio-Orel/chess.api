@@ -19,7 +19,6 @@ exports.up = function(knex) {
         table.string('event_format', ['swiss', 'scheveningen', 'group_duel', 'weinstein', 'levin']).nullable();
         table.boolean('is_rating_israel').nullable();
         table.boolean('is_rating_fide').nullable();
-
         table.boolean('is_active').defaultTo(true);
         table.timestamp('created_at').defaultTo(knex.fn.now());
         table.timestamp('updated_at').defaultTo(knex.fn.now());

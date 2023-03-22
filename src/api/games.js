@@ -1,15 +1,16 @@
 const { runRequest } = require("../common/request_wrapper");
 const { tables } = require("../common/constants");
 const { knex } = require("../common/request_wrapper");
-const { toDate, now } = require("../utils/date");
-const axios = require("axios");
 require('dotenv').config()
 
-const getGames = async(req, context) =>
-    runRequest(req, context, async(_, __) => await knex
+const getGames = async(req, context) => runRequest(req, context, async(_, __) => {
+    const result = await knex
         .select()
         .from(tables.games)
-        .where({ is_active: true }));
+        .where({ is_active: true });
+    return result;
+});
+
 
 const createGame = (req, context) =>
     runRequest(req, context, async(req, _) => {

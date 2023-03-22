@@ -30,7 +30,7 @@ provider:
   stage: dev
   runtime: nodejs16.x
   profile: ${self:custom.myProfile.${self:custom.myStage}}
-  timeout: 3000
+  timeout: 60
 
   iam:
     role: LambdaRole
@@ -114,40 +114,67 @@ functions:
           path: /events/{event_id}/register
           method: post
           
+  ## Events ##
+
+  ## Payments ##
   get_payment_form:
-    handler: src/api/events.getPaymentForm
+    handler: src/api/payment.getPaymentForm
     events:
       - httpApi:
-          path: /events/{event_id}/payments/form
+          path: /payment/{event_id}
           method: get
-  ## Events ##
+
+  on_payment_success:
+    handler: src/api/payment.onPaymentSuccess
+    events:
+      - httpApi:
+          path: /payment/success
+          method: post
+
+  on_payment_fail:
+    handler: src/api/payment.onPaymentFail
+    events:
+      - httpApi:
+          path: /payment/fail
+          method: post
+
+  ## Payments ##
 
   ## Events Participants ##
   get_event_participant:
     handler: src/api/events_participants.getEventParticipant
     events:
       - httpApi:
-          path: /events/{event_id}/participants/{participant_id}
+          path: /participants/{event_id}/{participant_id}
           method: get
 
   get_all_event_participants:
     handler: src/api/events_participants.getEventParticipants
     events:
       - httpApi:
-          path: /events/{event_id}/participants/{page_number}/{page_size}
+          path: /participants/{event_id}/{page_number}/{page_size}
           method: get
+    
+  get_events_participants:
+    handler: src/api/events_participants.getAllEventsParticipants
+    events:
+      - httpApi:
+          path: /participants/event_ids
+          method: get
+      
 
   add_event_participants:
     handler: src/api/events_participants.addEventParticipants
     events:
       - httpApi:
-          path: /events/{event_id}/participants
+          path: /participants/{event_id}
           method: post
-  delete_event_participant:
-    handler: src/api/events_participants.deleteEventParticipant
+
+  delete_event_participants:
+    handler: src/api/events_participants.deleteEventParticipants
     events:
       - httpApi:
-          path: /events/{event_id}/participants/{participant_id}
+          path: /participants/{event_id}/participant_ids
           method: delete
   ## Events Participants ##
   
@@ -193,7 +220,6 @@ functions:
       - httpApi:
           path: /games/{game_id}
           method: delete
-  ## Games ##
 
   ## Auth ##
   createAuthChallenge:

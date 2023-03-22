@@ -37,11 +37,11 @@ const getUserByPhoneNumber = async(req, context) => runRequest(req, context, asy
     return result;
 });
 
-const createUser = (req, context) => runRequest(req, context, async(req, _) => {
-    const { first_name, last_name, gender, email, phone_number, user_id } = req.body;
+const createUser = (req, context) => runRequest(req, context, async(req, user_id) => {
+    const { first_name, last_name, gender, email, phone_number } = req.body;
     await knex(tables.users)
         .insert({
-            id: user_id ? user_id : v4(),
+            id: user_id,
             first_name,
             last_name,
             gender,
@@ -51,7 +51,7 @@ const createUser = (req, context) => runRequest(req, context, async(req, _) => {
         .onConflict(['id'])
         .ignore();
     return user_id;
-}, false);
+});
 
 module.exports = {
     getUser,
