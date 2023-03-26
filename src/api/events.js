@@ -17,7 +17,7 @@ const getEvent = async(req, context) =>
         .where({ id: req.pathParameters.event_id }));
 
 const createEvent = (req, context) =>
-    runRequest(req, context, async(req, _) => {
+    runRequest(req, context, async(req, user_id) => {
         let {
             dates,
             name,
@@ -33,6 +33,25 @@ const createEvent = (req, context) =>
 
         if (!Array.isArray(dates)) {
             dates = [dates];
+        }
+
+        // Only if user is admin or super admin. Get user role from user_id
+        const user = await knex(tables.users)
+            .select(
+                'users.*',
+                'roles.name as role'
+            )
+            .join('users_roles', 'users.id', 'users_roles.user_id')
+            .join('roles', 'users_roles.role_id', 'roles.id')
+            .where('users.id', user_id)
+            .where('users.is_active', true)
+            .first();
+
+        if (user.role !== 'admin' && user.role !== 'super_admin') {
+            return {
+                error: 'You are not authorized to create events',
+                code: 401
+            }
         }
 
         let round_number = 1;
