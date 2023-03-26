@@ -26,13 +26,13 @@ const runRequest = async(req, context, request, check_user_id = true) => {
         result = await request(req, user_id);
         console.log(result);
         return {
-            statusCode: 200,
+            statusCode: result.code ?? 200,
             body: JSON.stringify(result ? result : {}),
         };
     } catch (error) {
         console.log(error);
         return ({
-            statusCode: 500,
+            statusCode: error.code ?? 500,
             body: JSON.stringify({
                 body: result ? result : {}
             }),

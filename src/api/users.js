@@ -5,10 +5,18 @@ const { v4 } = require('uuid');
 
 const getUser = async(req, context) => runRequest(req, context, async(_, __) => {
     const { user_id } = req.pathParameters;
-    const result = await knex(tables.users)
-        .where('id', user_id)
-        .where('is_active', true)
+
+    const result =  await knex(tables.users)
+        .select(
+            'users.*',
+            'roles.name as role'
+        )
+        .join('users_roles', 'users.id', 'users_roles.user_id')
+        .join('roles', 'users_roles.role_id', 'roles.id')
+        .where('users.id', user_id)
+        .where('users.is_active', true)
         .first();
+    
     return result ? {
         id: result.id,
         first_name: result.first_name,
@@ -18,6 +26,7 @@ const getUser = async(req, context) => runRequest(req, context, async(_, __) => 
         phone_number: result.phone_number,
         player_number: result.player_number,
         date_of_birth: result.date_of_birth,
+        role: result.role,
     } : null;
 }, false);
 
