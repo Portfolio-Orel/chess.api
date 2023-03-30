@@ -3,19 +3,19 @@ frameworkVersion: "3"
 
 custom:
   myStage: ${opt:stage, self:provider.stage}
-  myProfile: 
+  myProfile:
     prod: ChessApp
     dev: ChessApp
-  
+
   secrets:
     prod: ${file(secrets_dev.json)}
     dev: ${file(secrets_dev.json)}
-  
+
   serverless-offline:
     httpPort: 4000
     websocketPort: 4001
     lambdaPort: 4002
-  
+
   DB_NAME: ${file(./secrets_${self:custom.myStage}.json):DB_NAME}
   USERNAME: ${file(./secrets_${self:custom.myStage}.json):DB_USERNAME}
   PASSWORD: ${file(./secrets_${self:custom.myStage}.json):DB_PASSWORD}
@@ -57,7 +57,7 @@ functions:
       - httpApi:
           path: /users/email/{email}
           method: get
-      
+
   get_user_by_phone_number:
     handler: src/api/users.getUserByPhoneNumber
     events:
@@ -87,7 +87,7 @@ functions:
       - httpApi:
           path: /events
           method: get
-  
+
   create_event:
     handler: src/api/events.createEvent
     events:
@@ -113,7 +113,7 @@ functions:
       - httpApi:
           path: /events/{event_id}/register
           method: post
-          
+
   ## Events ##
 
   ## Payments ##
@@ -154,14 +154,13 @@ functions:
       - httpApi:
           path: /participants/{event_id}/{page_number}/{page_size}
           method: get
-    
+
   get_events_participants:
     handler: src/api/events_participants.getAllEventsParticipants
     events:
       - httpApi:
           path: /participants/event_ids
           method: get
-      
 
   add_event_participants:
     handler: src/api/events_participants.addEventParticipants
@@ -177,7 +176,7 @@ functions:
           path: /participants/{event_id}/participant_ids
           method: delete
   ## Events Participants ##
-  
+
   ## Chess User Data ##
   get_chess_user_data:
     handler: src/api/chess_user_data.getChessUserData
@@ -220,6 +219,35 @@ functions:
       - httpApi:
           path: /games/{game_id}
           method: delete
+  ## Games ##
+
+  ## Game Formats ##
+  get_game_formats:
+    handler: src/api/game_formats.getGameFormats
+    events:
+      - httpApi:
+          path: /gameFormats
+          method: get
+  add_game_format:
+    handler: src/api/game_formats.addGameFormat
+    events:
+      - httpApi:
+          path: /gameFormats
+          method: post
+  delete_game_format:
+    handler: src/api/game_formats.deleteGameFormat
+    events:
+      - httpApi:
+          path: /gameFormats/{game_format_id}
+          method: delete
+    update_game_format:
+      handler: src/api/game_formats.updateGameFormat
+      events:
+        - httpApi:
+            path: /gameFormats/{game_format_id}
+            method: put
+
+  ## Game Formats ##
 
   ## Auth ##
   createAuthChallenge:
@@ -246,7 +274,7 @@ functions:
 
 resources:
   Resources:
-    sendSMSRole: 
+    sendSMSRole:
       Type: AWS::IAM::Role
       Properties:
         RoleName: sendSMSRole

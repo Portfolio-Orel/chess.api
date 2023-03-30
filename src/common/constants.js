@@ -15,6 +15,7 @@ const tables = {
     club_details: 'club_details',
     chess_user_data: 'chess_user_data',
     games: 'games',
+    game_formats: 'game_formats',
 };
 
 const urls = {

@@ -1,7 +1,6 @@
 const { runRequest } = require('../common/request_wrapper');
 const { tables } = require('../common/constants');
 const { knex } = require('../common/request_wrapper');
-const { v4 } = require('uuid');
 
 const getUser = async(req, context) => runRequest(req, context, async(_, __) => {
     const { user_id } = req.pathParameters;
