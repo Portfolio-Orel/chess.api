@@ -25,7 +25,7 @@ const createEvent = (req, context) =>
             price,
             currency,
             event_type,
-            event_format,
+            game_format_id,
             is_rating_israel,
             is_rating_fide,
             game_id
@@ -35,7 +35,6 @@ const createEvent = (req, context) =>
             dates = [dates];
         }
 
-        // Only if user is admin or super admin. Get user role from user_id
         const user = await knex(tables.users)
             .select(
                 'users.*',
@@ -62,7 +61,7 @@ const createEvent = (req, context) =>
             price,
             currency,
             event_type,
-            event_format,
+            game_format_id,
             is_rating_israel,
             is_rating_fide,
             game_id,
