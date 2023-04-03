@@ -279,6 +279,7 @@ functions:
   ## Auth ##
   createAuthChallenge:
     handler: src/api/auth.createAuthChallenge
+    role: sendSMSRole
     events:
       - httpApi:
           path: /auth/create_auth_challenge

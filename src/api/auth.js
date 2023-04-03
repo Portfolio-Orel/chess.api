@@ -1,55 +1,82 @@
-const aws = require('aws-sdk');
-const { runRequest } = require('../common/request_wrapper');
-import { randomDigits } from 'crypto-secure-random-digit';
+const { randomDigits } = require("crypto-secure-random-digit");
+const aws = require("aws-sdk");
+const { runRequest } = require("../common/request_wrapper");
 
-const sns = new aws.SNS({ region: 'us-east-1' });
+const sns = new aws.SNS({ region: "us-east-1" });
 
-const createAuthChallenge = async(req, context) => runRequest(req, context, async(_, __) => {
-    const { phone_number } = req.body;
-    const message = `Your verification code is ${randomDigits(6).join('')}.`;
-    const params = {
-        Message: message,
-        PhoneNumber: phone_number,
-    };
-    const result = await sns.publish(params).promise();
-    console.log("result: ", result);
-    return result;
-}, false);
-
-const defineAuthChallenge = async(event) => {
-    const singleSessionLengthAndSRP = event.request.session.length === 1 &&
-        event.request.session[0].challengeName === 'SRP_A';
-    const secondSessionCustomChallenge = event.request.session.length === 2 &&
-        event.request.session[1].challengeName === 'CUSTOM_CHALLENGE' &&
-        event.request.session[1].challengeResult === true
-
-    if (singleSessionLengthAndSRP) {
-        event.response.issueTokens = false;
-        event.response.failAuthentication = false;
-        event.response.challengeName = 'CUSTOM_CHALLENGE';
-    } else if (secondSessionCustomChallenge) {
-        event.response.issueTokens = true;
-        event.response.failAuthentication = false;
-        event.response.challengeName = 'CUSTOM_CHALLENGE';
-    } else {
-        event.response.issueTokens = false;
-        event.response.failAuthentication = true;
-    }
+const createAuthChallenge = async (event = {}) => {
+  let secrentLoginCode;
+  if (!event.request?.session || event.request?.session?.length === 0) {
+    var phoneNumber = event.request.userAttributes.phone_number;
+    secrentLoginCode = randomDigits(6).join("");
+    await sendSMSviaSNS(phoneNumber, secrentLoginCode);
+  } else {
+    const previousChallenge = event.request.session.slice(-1)[0];
+    secrentLoginCode =
+      previousChallenge.challengeMetadata.match(/CODE-(\d*)/)[1];
+  }
+  event.response.publicChallengeParameters = {
+    phone: event.request.userAttributes.phone_number,
+  };
+  event.response.challengeMetadata = `CODE-${secrentLoginCode}`;
+  return event;
 };
 
-const verifyAuthChallengeResponse = async(event) => {
-    if (
-        event.request.privateChallengeParameters.answer ===
-        event.request.challengeAnswer
-    ) {
-        event.response.answerCorrect = true;
-    } else {
-        event.response.answerCorrect = false;
-    }
-}
+const sendSMSviaSNS = async (phoneNumber, secretCode) => {
+  const params = {
+    Message: "Your verification code is " + secretCode,
+    PhoneNumber: phoneNumber,
+  };
+  return sns.publish(params).promise();
+};
+
+const defineAuthChallenge = async (event) => {
+  if (
+    event.request.session &&
+    event.request.session.find(
+      (attempt) =>
+        attempt.challengeName === "CUSTOM_CHALLENGE" && !attempt.challengeResult
+    )
+  ) {
+    event.response.issueTokens = false;
+    event.response.failAuthentication = false;
+  } else if (
+    event.request.session &&
+    event.request.session.length >= 3 &&
+    event.requuest.session.slice(-1)[0].challengeResult === false
+  ) {
+    event.response.issueTokens = false;
+    event.response.failAuthentication = true;
+  } else if (
+    event.request.session &&
+    event.request.session.length &&
+    event.request.session.slice(-1)[0].challengeResult === true &&
+    event.request.session.slice(-1)[0].challengeName === "CUSTOM_CHALLENGE"
+  ) {
+    event.response.issueTokens = true;
+    event.response.failAuthentication = false;
+  } else {
+    event.response.issueTokens = false;
+    event.response.failAuthentication = false;
+    event.response.challengeName = "CUSTOM_CHALLENGE";
+  }
+
+  return event;
+};
+
+const verifyAuthChallengeResponse = async (event) => {
+  const expectedAnswer =
+    event.request.privateChallengeParameters.secrentLoginCode;
+  if (event.request.challengeAnswer === expectedAnswer) {
+    event.response.answerCorrect = true;
+  } else {
+    event.response.answerCorrect = false;
+  }
+  return event;
+};
 
 module.exports = {
-    createAuthChallenge,
-    defineAuthChallenge,
-    verifyAuthChallengeResponses
+  createAuthChallenge,
+  defineAuthChallenge,
+  verifyAuthChallengeResponse,
 };
