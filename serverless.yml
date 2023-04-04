@@ -51,26 +51,33 @@ functions:
           path: /users/{user_id}
           method: get
 
-  get_user_by_email:
-    handler: src/api/users.getUserByEmail
-    events:
-      - httpApi:
-          path: /users/email/{email}
-          method: get
-
-  get_user_by_phone_number:
-    handler: src/api/users.getUserByPhoneNumber
-    events:
-      - httpApi:
-          path: /users/phone_number/{phone_number}
-          method: get
-
   create_user:
     handler: src/api/users.createUser
     events:
       - httpApi:
           path: /users
           method: post
+
+  update_user:
+    handler: src/api/users.updateUser
+    events:
+      - httpApi:
+          path: /users/{user_id}
+          method: put
+
+  complete_registration:
+    handler: src/api/users.completeRegistration
+    events:
+      - httpApi:
+          path: /users/{user_id}/completeRegistration
+          method: put
+
+  is_registration_completed:
+    handler: src/api/users.isRegistrationCompleted
+    events:
+      - httpApi:
+          path: /users/{user_id}/isRegistrationCompleted
+          method: get
 
   ## Users ##
 

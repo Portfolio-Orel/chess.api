@@ -10,7 +10,7 @@ exports.up = function(knex) {
         table.string('first_name');
         table.string('last_name');
         table.string('gender');
-        table.string('email').unique();
+        table.string('email');
         table.string('phone_number').notNullable().unique();
         table.string('player_number').unique();
         table.timestamp('date_of_birth');
