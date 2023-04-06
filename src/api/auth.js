@@ -1,6 +1,5 @@
 const { randomDigits } = require("crypto-secure-random-digit");
 const aws = require("aws-sdk");
-const { runRequest } = require("../common/request_wrapper");
 
 const sns = new aws.SNS({ region: "us-east-1" });
 

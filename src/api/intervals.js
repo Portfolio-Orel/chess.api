@@ -1,24 +1,28 @@
 const { runRequest } = require("../common/request_wrapper");
 const { tables } = require("../common/constants");
 const { knex } = require("../common/request_wrapper");
-require('dotenv').config()
+const logger = require("../common/logger");
 
-const getIntervals = async (req, context) => runRequest(req, context, async (_, __) => {
-  const result = await knex
-    .select()
-    .from(tables.intervals)
-    .where({ is_active: true });
-  return result;
-});
+const getIntervals = async (req, context) =>
+  runRequest(req, context, async (_, __) => {
+    logger.info("Getting intervals");
+    const result = await knex
+      .select()
+      .from(tables.intervals)
+      .where({ is_active: true });
+    return result;
+  });
 
 const createInterval = (req, context) =>
   runRequest(req, context, async (req, _) => {
     let { name, value, description } = req.body;
-    const result = await knex.insert({
-      name,
-      value,
-      description,
-    }).into(tables.intervals);
+    const result = await knex
+      .insert({
+        name,
+        value,
+        description,
+      })
+      .into(tables.intervals);
     return result;
   });
 
