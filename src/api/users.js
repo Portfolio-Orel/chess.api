@@ -37,18 +37,47 @@ const getUser = async (req, context) =>
 
 const createUser = (req, context) =>
   runRequest(req, context, async (req, user_id) => {
-    const { first_name, last_name, gender, email, phone_number } = req.body;
-    await knex(tables.users)
-      .insert({
-        id: user_id,
-        first_name,
-        last_name,
-        gender,
-        email,
-        phone_number,
-      })
-      .onConflict(["id"])
-      .ignore();
+    const {
+      first_name,
+      last_name,
+      gender,
+      email,
+      phone_number,
+      club_id,
+      player_number,
+    } = req.body;
+    await knex.transaction(async (trx) => {
+      await trx(tables.users)
+        .insert({
+          id: user_id,
+          first_name,
+          last_name,
+          gender,
+          email,
+          phone_number,
+        })
+        .onConflict(["id"])
+        .ignore()
+        .then(async () => {
+          await trx(tables.users_roles)
+            .insert({
+              user_id,
+              role_id: 1,
+            })
+            .onConflict(["user_id"])
+            .ignore();
+        })
+        .then(async () => {
+          await trx(tables.chess_user_data);
+          insert({
+            user_id,
+            club_id,
+            player_number,
+          })
+            .onConflict(["user_id"])
+            .merge(["club_id", "player_number"]);
+        });
+    });
     return { user_id };
   });
 

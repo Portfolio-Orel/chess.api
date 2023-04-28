@@ -14,16 +14,16 @@ const knex = require('knex')({
     }
 });
 
-const runRequest = async(req, context, request, check_user_id = true) => {
+const runRequest = async(req, context, request, check_club_id = false) => {
     let result = {};
     try {
-        let user_id = null;
-        if (check_user_id) {
-            user_id = resolveUserId(req);
+        let club_id = null;
+        if (check_club_id) {
+            club_id = resolveClubId(req);
         }
         context.callbackWaitsForEmptyEventLoop = false;
         req.body = JSON.parse(req.body ? req.body : "{}");
-        result = await request(req, user_id);
+        result = await request(req, club_id);
         console.log(result);
         return {
             statusCode: result.code ?? 200,
@@ -43,7 +43,7 @@ const runRequest = async(req, context, request, check_user_id = true) => {
 
 const runRequestCallback = async(req, context, request) => {
     try {
-        const user_id = resolveUserId(req);
+        const user_id = resolveClubId(req);
         await request(req, user_id, callback, callbackError);
     } catch (error) {
         console.log(error);
@@ -57,16 +57,16 @@ const runRequestCallback = async(req, context, request) => {
     }
 }
 
-const resolveUserId = (req) => {
-    const { userid } = req.headers;
-    if (!userid) {
-        throw Error('Did you add userid to the headers?');
+const resolveClubId = (req) => {
+    const { club_id } = req.headers;
+    if (!club_id) {
+        throw Error('Did you add club_id to the headers?');
     }
     const regexExpUUID = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
-    if (regexExpUUID.test(userid)) {
-        return userid;
+    if (regexExpUUID.test(club_id)) {
+        return club_id;
     } else {
-        throw Error('userid is not a uuid.');
+        throw Error('club_id is not a uuid.');
     }
 };
 
