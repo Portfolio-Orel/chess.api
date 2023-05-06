@@ -1,93 +1,116 @@
-require('dotenv').config();
+require("dotenv").config();
 
-const knex = require('knex')({
-    client: 'pg',
-    connection: {
-        database: process.env.DB_NAME,
-        host: process.env.DB_HOST,
-        port: process.env.DB_PORT,
-        user: process.env.DB_USERNAME,
-        password: process.env.DB_PASSWORD,
-    },
-    migrations: {
-        tableName: 'migrations'
-    }
+const knex = require("knex")({
+  client: "pg",
+  connection: {
+    database: process.env.DB_NAME,
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    user: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+  },
+  migrations: {
+    tableName: "migrations",
+  },
 });
 
-const runRequest = async(req, context, request, check_club_id = false) => {
-    let result = {};
-    try {
-        let club_id = null;
-        if (check_club_id) {
-            club_id = resolveClubId(req);
-        }
-        context.callbackWaitsForEmptyEventLoop = false;
-        req.body = JSON.parse(req.body ? req.body : "{}");
-        result = await request(req, club_id);
-        console.log(result);
-        return {
-            statusCode: result.code ?? 200,
-            body: JSON.stringify(result ? result : {}),
-        };
-    } catch (error) {
-        console.log(error);
-        return ({
-            statusCode: error.code ?? 500,
-            body: JSON.stringify({
-                body: result ? result : {}
-            }),
-            error: "Request failed.",
-        });
+const runRequest = async (req, context, request, check_club_id = false) => {
+  let result = {};
+  try {
+    let club_id = null;
+    if (check_club_id) {
+      club_id = resolveClubId(req);
     }
-}
+    const user_id = resolveUserId(req);
+    console.log(user_id);
+    context.callbackWaitsForEmptyEventLoop = false;
+    req.body = JSON.parse(req.body ? req.body : "{}");
 
-const runRequestCallback = async(req, context, request) => {
-    try {
-        const user_id = resolveClubId(req);
-        await request(req, user_id, callback, callbackError);
-    } catch (error) {
-        console.log(error);
-        return ({
-            statusCode: 500,
-            body: JSON.stringify({
-                body: result ? result : {}
-            }),
-            error: "Request failed.",
-        });
-    }
-}
+    result = await request(req, club_id, user_id);
+
+    console.log(result);
+    return {
+      statusCode: result?.code ?? 200,
+      body: JSON.stringify(result ? result : {}),
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      statusCode: error.code ?? 500,
+      body: JSON.stringify({
+        body: result ? result : {},
+      }),
+      error: "Request failed.",
+    };
+  }
+};
+
+const runRequestCallback = async (req, context, request) => {
+  try {
+    const club_id = resolveClubId(req);
+    await request(req, club_id, callback, callbackError);
+  } catch (error) {
+    console.log(error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        body: result ? result : {},
+      }),
+      error: "Request failed.",
+    };
+  }
+};
 
 const resolveClubId = (req) => {
-    const { club_id } = req.headers;
-    if (!club_id) {
-        throw Error('Did you add club_id to the headers?');
-    }
-    const regexExpUUID = /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
-    if (regexExpUUID.test(club_id)) {
-        return club_id;
-    } else {
-        throw Error('club_id is not a uuid.');
-    }
+  const { club_id } = req.headers;
+  // if (!club_id) {
+  //     throw Error('Did you add club_id to the headers?');
+  // }
+  const regexExpUUID =
+    /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
+  if (regexExpUUID.test(club_id)) {
+    return club_id;
+  } else {
+    throw Error("club_id is not a uuid.");
+  }
+};
+
+const resolveUserId = (req) => {
+  const { UserId } = req.headers;
+  const { userid } = req.headers;
+  // if (!UserId && !userid) {
+  //   throw Error("Did you add UserId to the headers?");
+  // }
+  const regexExpUUID =
+    /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
+  return UserId ? UserId : userid;
+  // if (regexExpUUID.test(UserId)) {
+  //   return UserId;
+  // } else if (regexExpUUID.test(userid)) {
+  //   return userid;
+  // } else {
+  //   throw Error("userId is not a uuid.");
+  // }
 };
 
 const callbackError = (res, error) => {
-    console.log(error);
-    return {
-        statusCode: 200,
-        body: JSON.stringify({
-            body: result ? result : {}
-        }),
-    };
-}
+  console.log(error);
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      body: result ? result : {},
+    }),
+  };
+};
 
 const callback = (result) => {
-    return {
-        statusCode: 200,
-        body: JSON.stringify({
-            body: result ? result : {}
-        }),
-    };
-}
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      body: result ? result : {},
+    }),
+  };
+};
 
 /* Knex Debugging */
 
@@ -134,7 +157,7 @@ const callback = (result) => {
 /* Knex Debugging */
 
 module.exports = {
-    runRequest,
-    knex,
-    runRequestCallback,
+  runRequest,
+  knex,
+  runRequestCallback,
 };

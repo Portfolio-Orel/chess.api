@@ -30,7 +30,7 @@ provider:
   stage: dev
   runtime: nodejs16.x
   profile: ${self:custom.myProfile.${self:custom.myStage}}
-  timeout: 60
+  timeout: 45
 
   iam:
     role: LambdaRole
@@ -241,12 +241,12 @@ functions:
       - httpApi:
           path: /gameFormats
           method: post
-  delete_game_format:
-    handler: src/api/game_formats.deleteGameFormat
-    events:
-      - httpApi:
-          path: /gameFormats/{game_format_id}
-          method: delete
+  # delete_game_format:
+  #   handler: src/api/game_formats.deleteGameFormat
+  #   events:
+  #     - httpApi:
+  #         path: /gameFormats/{game_format_id}
+  #         method: delete
     update_game_format:
       handler: src/api/game_formats.updateGameFormat
       events:
@@ -286,7 +286,7 @@ functions:
   ## Auth ##
   createAuthChallenge:
     handler: src/api/auth.createAuthChallenge
-    role: sendSMSRole
+    role: sendEmailRole
     events:
       - httpApi:
           path: /auth/create_auth_challenge
@@ -309,29 +309,7 @@ functions:
 
 resources:
   Resources:
-    sendSMSRole:
-      Type: AWS::IAM::Role
-      Properties:
-        RoleName: sendSMSRole
-        AssumeRolePolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-            - Effect: Allow
-              Principal:
-                Service:
-                  - lambda.amazonaws.com
-              Action:
-                - sts:AssumeRole
-        Policies:
-          - PolicyName: sendSMSRolePolicy
-            PolicyDocument:
-              Version: "2012-10-17"
-              Statement:
-                - Effect: Allow
-                  Action:
-                    - "sns:Publish"
-                  Resource:
-                    - "arn:aws:sns:*:*:*"
+    sendEmailRole: ${file(./resource/SendEmailRole.yml)}
     LambdaRole: ${file(./resource/LambdaRole.yml)}
     PostgreSqlRDSInstance:
       Type: AWS::RDS::DBInstance

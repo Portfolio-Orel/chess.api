@@ -7,9 +7,7 @@ const getUser = async (req, context) =>
   runRequest(
     req,
     context,
-    async (_, __) => {
-      const { user_id } = req.pathParameters;
-
+    async (_, __, user_id) => {
       const result = await knex(tables.users)
         .select("users.*", "roles.name as role")
         .join("users_roles", "users.id", "users_roles.user_id")
@@ -36,8 +34,9 @@ const getUser = async (req, context) =>
   );
 
 const createUser = (req, context) =>
-  runRequest(req, context, async (req, user_id) => {
+  runRequest(req, context, async (req, _, __) => {
     const {
+      user_id,
       first_name,
       last_name,
       gender,
@@ -47,42 +46,27 @@ const createUser = (req, context) =>
       player_number,
     } = req.body;
     await knex.transaction(async (trx) => {
-      await trx(tables.users)
-        .insert({
-          id: user_id,
-          first_name,
-          last_name,
-          gender,
-          email,
-          phone_number,
-        })
-        .onConflict(["id"])
-        .ignore()
-        .then(async () => {
-          await trx(tables.users_roles)
-            .insert({
-              user_id,
-              role_id: 1,
-            })
-            .onConflict(["user_id"])
-            .ignore();
-        })
-        .then(async () => {
-          await trx(tables.chess_user_data);
-          insert({
-            user_id,
-            club_id,
-            player_number,
-          })
-            .onConflict(["user_id"])
-            .merge(["club_id", "player_number"]);
+      await trx(tables.users).insert({
+        id: user_id,
+        first_name,
+        last_name,
+        gender,
+        email,
+        phone_number,
+      });
+      if (club_id && player_number) {
+        await trx(tables.chess_user_data).insert({
+          user_id,
+          club_id,
+          player_number,
         });
+      }
     });
     return { user_id };
   });
 
 const updateUser = (req, context) =>
-  runRequest(req, context, async (req, user_id) => {
+  runRequest(req, context, async (req, _, user_id) => {
     let { first_name, last_name, date_of_birth, gender } = req.body;
     date_of_birth = toDate(date_of_birth);
     await knex(tables.users)
@@ -96,7 +80,7 @@ const updateUser = (req, context) =>
   });
 
 const completeRegistration = (req, context) =>
-  runRequest(req, context, async (req, user_id) => {
+  runRequest(req, context, async (req, _, user_id) => {
     let { first_name, last_name, date_of_birth, gender } = req.body;
     date_of_birth = toDate(date_of_birth);
     await knex(tables.users)
