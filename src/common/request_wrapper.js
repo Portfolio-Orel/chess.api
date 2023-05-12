@@ -17,18 +17,13 @@ const knex = require("knex")({
 const runRequest = async (req, context, request, check_club_id = false) => {
   let result = {};
   try {
-    let club_id = null;
-    if (check_club_id) {
-      club_id = resolveClubId(req);
-    }
     const user_id = resolveUserId(req);
     console.log(user_id);
     context.callbackWaitsForEmptyEventLoop = false;
     req.body = JSON.parse(req.body ? req.body : "{}");
 
-    result = await request(req, club_id, user_id);
+    result = await request(req, user_id);
 
-    console.log(result);
     return {
       statusCode: result?.code ?? 200,
       body: JSON.stringify(result ? result : {}),
@@ -42,36 +37,6 @@ const runRequest = async (req, context, request, check_club_id = false) => {
       }),
       error: "Request failed.",
     };
-  }
-};
-
-const runRequestCallback = async (req, context, request) => {
-  try {
-    const club_id = resolveClubId(req);
-    await request(req, club_id, callback, callbackError);
-  } catch (error) {
-    console.log(error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({
-        body: result ? result : {},
-      }),
-      error: "Request failed.",
-    };
-  }
-};
-
-const resolveClubId = (req) => {
-  const { club_id } = req.headers;
-  // if (!club_id) {
-  //     throw Error('Did you add club_id to the headers?');
-  // }
-  const regexExpUUID =
-    /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
-  if (regexExpUUID.test(club_id)) {
-    return club_id;
-  } else {
-    throw Error("club_id is not a uuid.");
   }
 };
 
@@ -91,25 +56,6 @@ const resolveUserId = (req) => {
   // } else {
   //   throw Error("userId is not a uuid.");
   // }
-};
-
-const callbackError = (res, error) => {
-  console.log(error);
-  return {
-    statusCode: 200,
-    body: JSON.stringify({
-      body: result ? result : {},
-    }),
-  };
-};
-
-const callback = (result) => {
-  return {
-    statusCode: 200,
-    body: JSON.stringify({
-      body: result ? result : {},
-    }),
-  };
 };
 
 /* Knex Debugging */
@@ -158,6 +104,5 @@ const callback = (result) => {
 
 module.exports = {
   runRequest,
-  knex,
-  runRequestCallback,
+  knex
 };

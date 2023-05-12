@@ -5,7 +5,7 @@ const { toDate, now } = require("../utils/date");
 require("dotenv").config();
 
 const getAllEvents = async (req, context) =>
-  runRequest(req, context, async (_, __) => {
+  runRequest(req, context, async (_, user_id) => {
     const result = await knex
       .select()
       .from(tables.events)
@@ -22,7 +22,7 @@ const getEvent = async (req, context) =>
   runRequest(
     req,
     context,
-    async (_, __) =>
+    async (_, user_id) =>
       await knex
         .select()
         .from(tables.events)
@@ -31,7 +31,7 @@ const getEvent = async (req, context) =>
 
 const createEvent = (req, context) =>
   // TODO: Make event belong to club
-  runRequest(req, context, async (req, _, user_id) => {
+  runRequest(req, context, async (req, user_id) => {
     let {
       dates,
       name,
@@ -129,18 +129,47 @@ const deleteEvent = (req, context) =>
   });
 
 const registerToEvent = (req, context) =>
-  runRequest(req, context, async (req, _, user_id) => {
+  runRequest(req, context, async (req, user_id) => {
     const { event_id } = req.pathParameters;
     const event_participant = await knex
-      .insert({
-        user_id,
-        event_id,
-        created_at: now(),
+      .select()
+      .from(tables.events_participants)
+      .where({ event_id, user_id })
+      .first();
+    let result = {};
+    if (event_participant) {
+      result = await knex
+        .update({
+          is_active: true,
+          updated_at: now(),
+        })
+        .where({ event_id, user_id })
+        .into(tables.events_participants)
+        .returning("*");
+    } else {
+      result = await knex(tables.events_participants)
+        .insert({
+          event_id,
+          user_id,
+          is_active: true,
+          created_at: now(),
+          updated_at: now(),
+        })
+        .returning("*");
+    }
+    return result ? result[0] : {};
+  });
+
+const unregisterFromEvent = (req, context) =>
+  runRequest(req, context, async (req, user_id) => {
+    const { event_id } = req.pathParameters;
+    await knex
+      .update({
+        is_active: false,
         updated_at: now(),
       })
-      .into(tables.events_participants)
-      .returning("*");
-    return event_participant ? event_participant[0] : {};
+      .where({ event_id, user_id })
+      .from(tables.events_participants);
   });
 
 module.exports = {
@@ -150,4 +179,5 @@ module.exports = {
   deleteEvent,
   getAllEvents,
   registerToEvent,
+  unregisterFromEvent,
 };

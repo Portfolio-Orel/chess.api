@@ -1,9 +1,8 @@
 const { runRequest } = require("../common/request_wrapper");
 const { tables } = require("../common/constants");
 const { knex } = require("../common/request_wrapper");
-require('dotenv').config()
 
-const getGames = async(req, context) => runRequest(req, context, async(_, __) => {
+const getGames = async(req, context) => runRequest(req, context, async (_, user_id) => {
     const result = await knex
         .select()
         .from(tables.games)
@@ -13,7 +12,7 @@ const getGames = async(req, context) => runRequest(req, context, async(_, __) =>
 
 
 const createGame = (req, context) =>
-    runRequest(req, context, async(req, _) => {
+    runRequest(req, context, async (req, _) => {
         let {
             time_start_min,
             increment_before_time_control_sec,
@@ -34,7 +33,7 @@ const createGame = (req, context) =>
     });
 
 const deleteGame = (req, context) =>
-    runRequest(req, context, async(req, _) => {
+    runRequest(req, context, async (req, _) => {
         const result = await knex(tables.games)
             .where({ id: req.pathParameters.game_id })
             .update({ is_active: false });

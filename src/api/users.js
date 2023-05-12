@@ -7,14 +7,14 @@ const getUser = async (req, context) =>
   runRequest(
     req,
     context,
-    async (_, __, user_id) => {
+    async (req, __) => {
+      const user_id = req.pathParameters.user_id;
       const result = await knex(tables.users)
         .select("users.*", "roles.name as role")
         .join("users_roles", "users.id", "users_roles.user_id")
         .join("roles", "users_roles.role_id", "roles.id")
         .where("users.id", user_id)
         .where("users.is_active", true)
-        .first();
 
       return result
         ? {
@@ -66,7 +66,7 @@ const createUser = (req, context) =>
   });
 
 const updateUser = (req, context) =>
-  runRequest(req, context, async (req, _, user_id) => {
+  runRequest(req, context, async (req, user_id) => {
     let { first_name, last_name, date_of_birth, gender } = req.body;
     date_of_birth = toDate(date_of_birth);
     await knex(tables.users)
@@ -80,22 +80,26 @@ const updateUser = (req, context) =>
   });
 
 const completeRegistration = (req, context) =>
-  runRequest(req, context, async (req, _, user_id) => {
-    let { first_name, last_name, date_of_birth, gender } = req.body;
-    date_of_birth = toDate(date_of_birth);
-    await knex(tables.users)
-      .update({
-        first_name,
-        last_name,
-        date_of_birth,
-        gender,
-        is_registration_completed: true,
-      })
-      .where("id", user_id);
+  runRequest(req, context, async (req, user_id) => {
+    let { first_name, last_name, player_number, club_id } = req.body;
+    await knex.transaction(async (trx) => {
+      await trx(tables.users)
+        .update({
+          first_name,
+          last_name,
+          is_registration_completed: true,
+        })
+        .where({ id: user_id });
+      await trx(tables.chess_user_data).insert({
+        user_id,
+        player_number,
+        club_id,
+      });
+    });
   });
 
 const isRegistrationCompleted = (req, context) =>
-  runRequest(req, context, async (_, __) => {
+  runRequest(req, context, async (_, user_id) => {
     try {
       const { user_id } = req.pathParameters;
       const result = await knex(tables.users)

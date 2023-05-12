@@ -4,7 +4,7 @@ const { knex } = require("../common/request_wrapper");
 require("dotenv").config();
 
 const getGameFormats = async (req, context) =>
-  runRequest(req, context, async (_, __) => {
+  runRequest(req, context, async (_, user_id) => {
     const result = await knex
       .select()
       .from(tables.game_formats)

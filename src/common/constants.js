@@ -12,7 +12,6 @@ const tables = {
   users: "users",
   events: "events",
   events_participants: "events_participants",
-  club_details: "club_details",
   clubs: "clubs",
   chess_user_data: "chess_user_data",
   games: "games",

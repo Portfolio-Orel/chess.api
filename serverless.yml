@@ -69,7 +69,7 @@ functions:
     handler: src/api/users.completeRegistration
     events:
       - httpApi:
-          path: /users/{user_id}/completeRegistration
+          path: /users/completeRegistration
           method: put
 
   is_registration_completed:
@@ -121,7 +121,29 @@ functions:
           path: /events/{event_id}/register
           method: post
 
+  unregister_from_event:
+    handler: src/api/events.unregisterFromEvent
+    events:
+      - httpApi:
+          path: /events/{event_id}/unregister
+          method: post
   ## Events ##
+
+  ## Clubs ##
+  get_all_clubs:
+    handler: src/api/clubs.getAllClubs
+    events:
+      - httpApi:
+          path: /clubs
+          method: get
+
+  get_club:
+    handler: src/api/clubs.getClub
+    events:
+      - httpApi:
+          path: /clubs/{club_id}
+          method: get
+  ## Clubs ##
 
   ## Payments ##
   get_payment_form:
@@ -159,7 +181,7 @@ functions:
     handler: src/api/events_participants.getEventParticipants
     events:
       - httpApi:
-          path: /participants/{event_id}/{page_number}/{page_size}
+          path: /participants/{event_id}
           method: get
 
   get_events_participants:
@@ -167,6 +189,13 @@ functions:
     events:
       - httpApi:
           path: /participants/event_ids
+          method: get
+
+  get_events_participants_by_user_id:
+    handler: src/api/events_participants.getEventParticipantsByUserId
+    events:
+      - httpApi:
+          path: /participants
           method: get
 
   add_event_participants:
@@ -241,12 +270,12 @@ functions:
       - httpApi:
           path: /gameFormats
           method: post
-  # delete_game_format:
-  #   handler: src/api/game_formats.deleteGameFormat
-  #   events:
-  #     - httpApi:
-  #         path: /gameFormats/{game_format_id}
-  #         method: delete
+    # delete_game_format:
+    #   handler: src/api/game_formats.deleteGameFormat
+    #   events:
+    #     - httpApi:
+    #         path: /gameFormats/{game_format_id}
+    #         method: delete
     update_game_format:
       handler: src/api/game_formats.updateGameFormat
       events:

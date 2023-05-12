@@ -34,7 +34,7 @@ const getToken = async() => {
 }
 
 
-const getPaymentForm = async(req, context) => runRequest(req, context, async(req, _) => {
+const getPaymentForm = async(req, context) => runRequest(req, context, async (req, _) => {
     const { event_id } = req.pathParameters;
     const {
         price,
@@ -87,11 +87,11 @@ const getPaymentForm = async(req, context) => runRequest(req, context, async(req
 });
 
 // When the payment is successful, trigger the android app to send a notification to the user
-const onPaymentSuccess = async(req, context) => runRequest(req, context, async(req, _) => {
+const onPaymentSuccess = async(req, context) => runRequest(req, context, async (req, _) => {
 
 });
 
-const onPaymentFailure = async(req, context) => runRequest(req, context, async(req, _) => {});
+const onPaymentFailure = async(req, context) => runRequest(req, context, async (req, _) => {});
 
 module.exports = {
     getPaymentForm,
