@@ -2,6 +2,7 @@ const { runRequest } = require("../common/request_wrapper");
 const { tables } = require("../common/constants");
 const { knex } = require("../common/request_wrapper");
 const { toDate } = require("../utils/date");
+const logger = require("../common/logger");
 
 const getUser = async (req, context) =>
   runRequest(
@@ -15,8 +16,9 @@ const getUser = async (req, context) =>
         .join("roles", "users_roles.role_id", "roles.id")
         .where("users.id", user_id)
         .where("users.is_active", true)
+        .first();
 
-      return result
+      const user = result
         ? {
             id: result.id,
             first_name: result.first_name,
@@ -29,6 +31,9 @@ const getUser = async (req, context) =>
             role: result.role,
           }
         : null;
+
+      logger.info(`User ${user_id} was fetched`);
+      return user;
     },
     false
   );
@@ -96,6 +101,7 @@ const completeRegistration = (req, context) =>
         club_id,
       });
     });
+    logger.info(`User ${user_id} completed registration`);
   });
 
 const isRegistrationCompleted = (req, context) =>

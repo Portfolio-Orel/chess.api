@@ -5,13 +5,13 @@
     "main": "index.ts",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "debug": "SET SLS_DEBUG=* && node --inspect node_modules\\serverless\\bin\\serverless offline"
+        "debug": "SET SLS_DEBUG=* && node --inspect node_modules\\serverless\\bin\\serverless offline --stage dev"
     },
     "author": "",
     "license": "ISC",
     "dependencies": {
         "aws-lambda": "^1.0.7",
-        "aws-sdk": "^2.1331.0",
+        "aws-sdk": "^2.1377.0",
         "axios": "^1.3.3",
         "crypto-secure-random-digit": "^1.0.10",
         "dotenv": "^16.0.3",

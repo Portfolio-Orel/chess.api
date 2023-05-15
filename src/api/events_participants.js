@@ -88,7 +88,7 @@ const getEventParticipantsByUserId = async (req, context) =>
   runRequest(req, context, async (_, user_id) => {
     const result = await knex(tables.events_participants)
       .select("*")
-      .where({ user_id });
+      .where({ user_id, is_active: true });
     return result ? result : {};
   });
 

@@ -16,6 +16,11 @@ custom:
     websocketPort: 4001
     lambdaPort: 4002
 
+  logLevelMap:
+    prod: info
+    dev: info
+  logLevel: ${self:custom.logLevelMap.${opt:stage}, 'debug'}
+
   DB_NAME: ${file(./secrets_${self:custom.myStage}.json):DB_NAME}
   USERNAME: ${file(./secrets_${self:custom.myStage}.json):DB_USERNAME}
   PASSWORD: ${file(./secrets_${self:custom.myStage}.json):DB_PASSWORD}
@@ -30,7 +35,7 @@ provider:
   stage: dev
   runtime: nodejs16.x
   profile: ${self:custom.myProfile.${self:custom.myStage}}
-  timeout: 45
+  logRetentionInDays: 30
 
   iam:
     role: LambdaRole
@@ -41,6 +46,8 @@ provider:
     DB_PASSWORD: ${self:custom.secrets.${self:custom.myStage}.DB_PASSWORD}
     DB_HOST: ${self:custom.secrets.${self:custom.myStage}.DB_HOST}
     DB_PORT: ${self:custom.secrets.${self:custom.myStage}.DB_PORT}
+    LOG_LEVEL: ${self:custom.logLevel}
+    ENVIRONMENT: ${self:custom.myStage}
 
 functions:
   ## Users ##
@@ -276,12 +283,12 @@ functions:
     #     - httpApi:
     #         path: /gameFormats/{game_format_id}
     #         method: delete
-    update_game_format:
-      handler: src/api/game_formats.updateGameFormat
-      events:
-        - httpApi:
-            path: /gameFormats/{game_format_id}
-            method: put
+  update_game_format:
+    handler: src/api/game_formats.updateGameFormat
+    events:
+      - httpApi:
+          path: /gameFormats/{game_format_id}
+          method: put
   ## Game Formats ##
 
   ## Intervals ##
