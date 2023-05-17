@@ -5,7 +5,8 @@
     "main": "index.ts",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "debug": "SET SLS_DEBUG=* && node --inspect node_modules\\serverless\\bin\\serverless offline --stage dev"
+        "debug": "SET SLS_DEBUG=* && node --inspect node_modules\\serverless\\bin\\serverless offline --stage dev",
+        "start": "serverless offline --stage dev"
     },
     "author": "",
     "license": "ISC",
