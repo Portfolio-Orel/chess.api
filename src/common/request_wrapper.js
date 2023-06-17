@@ -1,4 +1,5 @@
 require("dotenv").config();
+const logger = require("./logger");
 
 const knex = require("knex")({
   client: "pg",
@@ -18,10 +19,12 @@ const runRequest = async (req, context, request, check_club_id = false) => {
   let result = {};
   try {
     const user_id = resolveUserId(req);
-    console.log(user_id);
+
     context.callbackWaitsForEmptyEventLoop = false;
     req.body = JSON.parse(req.body ? req.body : "{}");
-
+    logger.info("api called", [
+      { request: `${request}`, user_id: `${user_id}`, body: req.body },
+    ]);
     result = await request(req, user_id);
 
     return {
@@ -29,7 +32,7 @@ const runRequest = async (req, context, request, check_club_id = false) => {
       body: JSON.stringify(result ? result : {}),
     };
   } catch (error) {
-    console.log(error);
+    logger.error(error);
     return {
       statusCode: error.code ?? 500,
       body: JSON.stringify({
@@ -104,5 +107,5 @@ const resolveUserId = (req) => {
 
 module.exports = {
   runRequest,
-  knex
+  knex,
 };
