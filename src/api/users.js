@@ -39,9 +39,8 @@ const getUser = async (req, context) =>
   );
 
 const createUser = (req, context) =>
-  runRequest(req, context, async (req, _, __) => {
+  runRequest(req, context, async (req, user_id) => {
     const {
-      user_id,
       first_name,
       last_name,
       gender,

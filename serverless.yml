@@ -36,6 +36,7 @@ provider:
   runtime: nodejs16.x
   profile: ${self:custom.myProfile.${self:custom.myStage}}
   logRetentionInDays: 30
+  timeout: 30
 
   iam:
     role: LambdaRole
@@ -135,6 +136,21 @@ functions:
           path: /events/{event_id}/unregister
           method: post
   ## Events ##
+
+  ## Rating ##
+  calculate_new_rating:
+    handler: src/api/rating.calculateNewRating
+    events:
+      - httpApi:
+          path: /newRating
+          method: post
+  get_rating:
+    handler: src/api/rating.getRating
+    events:
+      - httpApi:
+          path: /rating
+          method: get
+## Rating ##
 
   ## Clubs ##
   get_all_clubs:

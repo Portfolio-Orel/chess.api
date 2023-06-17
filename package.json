@@ -13,7 +13,8 @@
     "dependencies": {
         "aws-lambda": "^1.0.7",
         "aws-sdk": "^2.1377.0",
-        "axios": "^1.3.3",
+        "axios": "^1.4.0",
+        "cheerio": "^1.0.0-rc.12",
         "crypto-secure-random-digit": "^1.0.10",
         "dotenv": "^16.0.3",
         "knex": "^2.2.0",
