@@ -1,27 +1,16 @@
-const winston = require("winston");
+const { createLogger, format, transports } = require("winston");
 
-const enumerateErrorFormat = winston.format((info) => {
-  if (info instanceof Error) {
-    Object.assign(info, { message: info.stack });
-  }
-  return info;
-});
+const httpTransportOptions = {
+  host: process.env.DD_HOST,
+  path: process.env.DD_PATH,
+  ssl: true,
+};
 
-const logger = winston.createLogger({
-  level: process.env.LOG_LEVEL || "info",
-  format: winston.format.combine(
-    enumerateErrorFormat(),
-    process.env === "dev"
-      ? winston.format.colorize()
-      : winston.format.uncolorize(),
-    winston.format.splat(),
-    winston.format.printf(({ level, message }) => `${level}: ${message}`)
-  ),
-  transports: [
-    new winston.transports.Console({
-      stderrLevels: ["error"],
-    }),
-  ],
+const logger = createLogger({
+  level: "info",
+  exitOnError: false,
+  format: format.json(),
+  transports: [new transports.Http(httpTransportOptions)],
 });
 
 module.exports = logger;

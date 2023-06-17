@@ -1,3 +1,5 @@
+const logger = require("../common/logger");
+
 class CONSTS {
   static POINTS_FOR_GAME_AGAINST_UNRATED_PLAYER = 2;
 
@@ -96,7 +98,7 @@ function ratingDiff(Ro, Ry) {
 }
 
 // Returns new rating of a player
-function calculateRating(player, games) {
+async function calculateRating(player, games) {
   let rating_change = 0;
   let number_of_games = games.length;
 
@@ -110,7 +112,7 @@ function calculateRating(player, games) {
     // No GameResultMultiplier as we can reach Game result easily from Game class
     let P = 1 - current_game.opponentPoints; // for getting player's result
 
-    console.log("K", K, "B", B, "D", D, "P", P);
+    logger.error("Test");
 
     let change =
       K * (P * 2 - 1) + (K * D) / CONSTS.GAME_DIFF_CONSTANT_DIVIDER + B;

@@ -3,6 +3,8 @@ const { tables } = require("../common/constants");
 const { calculateRating } = require("../common/rating_calculator");
 const { knex } = require("../common/request_wrapper");
 
+const logger = require("../common/logger");
+
 const axios = require("axios");
 const cheerio = require("cheerio");
 
@@ -11,7 +13,7 @@ require("dotenv").config();
 const calculateNewRating = async (req, context) =>
   runRequest(req, context, async (_, user_id) => {
     const { player, games } = req.body;
-    return calculateRating(player, games);
+    return await calculateRating(player, games);
   });
 
 const getRating = async (req, context) =>
