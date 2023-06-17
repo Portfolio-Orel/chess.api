@@ -16,11 +16,6 @@ custom:
     websocketPort: 4001
     lambdaPort: 4002
 
-  logLevelMap:
-    prod: info
-    dev: info
-  logLevel: ${self:custom.logLevelMap.${opt:stage}, 'debug'}
-
   DB_NAME: ${file(./secrets_${self:custom.myStage}.json):DB_NAME}
   USERNAME: ${file(./secrets_${self:custom.myStage}.json):DB_USERNAME}
   PASSWORD: ${file(./secrets_${self:custom.myStage}.json):DB_PASSWORD}
@@ -47,7 +42,6 @@ provider:
     DB_PASSWORD: ${self:custom.secrets.${self:custom.myStage}.DB_PASSWORD}
     DB_HOST: ${self:custom.secrets.${self:custom.myStage}.DB_HOST}
     DB_PORT: ${self:custom.secrets.${self:custom.myStage}.DB_PORT}
-    LOG_LEVEL: ${self:custom.logLevel}
     ENVIRONMENT: ${self:custom.myStage}
 
 functions:
@@ -336,32 +330,32 @@ functions:
   ## Intervals ##
 
   ## Auth ##
-  createAuthChallenge:
-    handler: src/api/auth.createAuthChallenge
-    role: sendEmailRole
-    events:
-      - httpApi:
-          path: /auth/create_auth_challenge
-          method: post
+  # createAuthChallenge:
+  #   handler: src/api/auth.createAuthChallenge
+  #   role: sendEmailRole
+  #   events:
+  #     - httpApi:
+  #         path: /auth/create_auth_challenge
+  #         method: post
 
-  defineAuthChallenge:
-    handler: src/api/auth.defineAuthChallenge
-    events:
-      - httpApi:
-          path: /auth/define_auth_challenge
-          method: post
+  # defineAuthChallenge:
+  #   handler: src/api/auth.defineAuthChallenge
+  #   events:
+  #     - httpApi:
+  #         path: /auth/define_auth_challenge
+  #         method: post
 
-  verifyAuthChallengeResponse:
-    handler: src/api/auth.verifyAuthChallengeResponse
-    events:
-      - httpApi:
-          path: /auth/verify_auth_challenge_response
-          method: post
+  # verifyAuthChallengeResponse:
+  #   handler: src/api/auth.verifyAuthChallengeResponse
+  #   events:
+  #     - httpApi:
+  #         path: /auth/verify_auth_challenge_response
+  #         method: post
   ## Auth ##
 
 resources:
   Resources:
-    sendEmailRole: ${file(./resource/SendEmailRole.yml)}
+    # sendEmailRole: ${file(./resource/SendEmailRole.yml)}
     LambdaRole: ${file(./resource/LambdaRole.yml)}
     PostgreSqlRDSInstance:
       Type: AWS::RDS::DBInstance
