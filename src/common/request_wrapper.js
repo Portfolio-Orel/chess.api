@@ -14,7 +14,6 @@ const knex = require("knex")({
     tableName: "migrations",
   },
 });
-
 const runRequest = async (req, context, request, check_club_id = false) => {
   let result = {};
   try {
@@ -36,9 +35,9 @@ const runRequest = async (req, context, request, check_club_id = false) => {
     return {
       statusCode: error.code ?? 500,
       body: JSON.stringify({
-        body: result ? result : {},
+        error: error.message || "Request failed.",
+        result: result ? result : {},
       }),
-      error: "Request failed.",
     };
   }
 };

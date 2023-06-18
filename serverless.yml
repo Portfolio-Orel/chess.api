@@ -138,12 +138,6 @@ functions:
       - httpApi:
           path: /newRating
           method: post
-  get_rating:
-    handler: src/api/rating.getRating
-    events:
-      - httpApi:
-          path: /rating
-          method: get
 ## Rating ##
 
   ## Clubs ##

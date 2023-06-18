@@ -1,8 +1,11 @@
 const { runRequest } = require("../common/request_wrapper");
 const { tables } = require("../common/constants");
 const { knex } = require("../common/request_wrapper");
+const { fetchRating } = require("./rating");
 const { toDate } = require("../utils/date");
 const logger = require("../common/logger");
+
+const UserNumberNotFoundError = require("../common/errors/player_number_not_found");
 
 const getUser = async (req, context) =>
   runRequest(
@@ -49,6 +52,8 @@ const createUser = (req, context) =>
       club_id,
       player_number,
     } = req.body;
+
+    const rating = await fetchRating(player_number);
     await knex.transaction(async (trx) => {
       await trx(tables.users).insert({
         id: user_id,
@@ -62,6 +67,8 @@ const createUser = (req, context) =>
         await trx(tables.chess_user_data).insert({
           user_id,
           club_id,
+          rating_israel: rating.rating_israel,
+          rating_fide: rating.rating_fide ?? 0,
           player_number,
         });
       }
