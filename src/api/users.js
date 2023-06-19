@@ -43,23 +43,14 @@ const getUser = async (req, context) =>
 
 const createUser = (req, context) =>
   runRequest(req, context, async (req, user_id) => {
-    const {
-      first_name,
-      last_name,
-      gender,
-      email,
-      phone_number,
-      club_id,
-      player_number,
-    } = req.body;
+    const { email, phone_number, club_id, player_number } = req.body;
 
-    const rating = await fetchRating(player_number);
+    const player_details = await fetchRating(player_number);
     await knex.transaction(async (trx) => {
       await trx(tables.users).insert({
         id: user_id,
-        first_name,
-        last_name,
-        gender,
+        first_name: player_details.first_name,
+        last_name: player_details.last_name,
         email,
         phone_number,
       });
@@ -67,8 +58,8 @@ const createUser = (req, context) =>
         await trx(tables.chess_user_data).insert({
           user_id,
           club_id,
-          rating_israel: rating.rating_israel,
-          rating_fide: rating.rating_fide ?? 0,
+          rating_israel: player_details.rating_israel,
+          rating_fide: player_details.rating_fide ?? 0,
           player_number,
         });
       }
