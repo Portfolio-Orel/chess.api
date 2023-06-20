@@ -17,11 +17,11 @@ const calculateNewRating = async (req, context) =>
 const fetchRating = async (player_number) => {
   const chess_rating_url = process.env.CHESS_RATING_URL;
   const player_details = {};
-  const chess_rating_result = await axios.get(`${chess_rating_url}${4169}`);
+  const chess_rating_result = await axios.get(`${chess_rating_url}${player_number}`);
   const html = chess_rating_result.data;
   const data = extractDataFromHTML(html);
   if (!data.rating_israel) {
-    throw new Error("Player number not found.");
+    throw new Error(`Player number ${player_number} was not found`);
   }
   if (data.rating_fide && data.rating_fide.length > 0) {
     player_details.rating_fide = data.rating_fide[0];
@@ -44,10 +44,10 @@ const fetchRating = async (player_number) => {
   if (data.fide_player_id) {
     player_details.fide_player_id = data.fide_player_id;
   }
-  if (data.player_card_expire_date) {
-    const [day, month, year] = data.player_card_expire_date.split("/");
+  if (data.profile_expiration_date) {
+    const [day, month, year] = data.profile_expiration_date.split("/");
     const date = new Date(`${year}-${month}-${day}`);
-    player_details.player_card_expire_date = toDate(date.getTime());
+    player_details.profile_expiration_date = toDate(date.getTime());
   }
   if (data.full_name) {
     player_details.full_name = data.full_name;
@@ -56,7 +56,7 @@ const fetchRating = async (player_number) => {
     player_details.last_name = lastName;
   }
 
-  return { player_details };
+  return player_details;
 };
 
 const extractFirstAndLastName = (fullName) => {
@@ -99,7 +99,7 @@ const extractDataFromHTML = (html) => {
     .trim()
     .match(/\d+/);
   const year_of_birth = $('li:contains("שנת לידה")').text().trim().match(/\d+/);
-  const player_card_expire_date = $('li:contains("תוקף כרטיס שחמטאי")')
+  const profile_expiration_date = $('li:contains("תוקף כרטיס שחמטאי")')
     .text()
     .trim()
     .replace(/[^\d/]/g, "");
@@ -112,7 +112,7 @@ const extractDataFromHTML = (html) => {
     rating_fide_rapid,
     rating_fide_blitz,
     year_of_birth,
-    player_card_expire_date,
+    profile_expiration_date,
     full_name,
   };
 };

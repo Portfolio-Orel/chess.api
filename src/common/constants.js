@@ -17,6 +17,8 @@ const tables = {
   games: "games",
   game_formats: "game_formats",
   intervals: "intervals",
+  users_roles: "users_roles",
+  roles: "roles",
 };
 
 const urls = {
