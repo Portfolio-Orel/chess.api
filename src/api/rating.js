@@ -11,7 +11,10 @@ require("dotenv").config();
 const calculateNewRating = async (req, context) =>
   runRequest(req, context, async (_, user_id) => {
     const { player, games } = req.body;
-    return await calculateRating(player, games);
+    const newRating = await calculateRating(player, games);
+    return {
+      result: newRating
+    };
   });
 
 const fetchRating = async (player_number) => {

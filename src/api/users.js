@@ -33,7 +33,12 @@ const getUser = async (req, context) =>
             email: result.email,
             phone_number: result.phone_number,
             player_number: result.player_number,
+            rating_israel: result.rating_israel,
+            rating_fide: result.rating_fide,
+            rating_rapid: result.rating_rapid,
+            rating_blitz: result.rating_blitz,
             date_of_birth: result.date_of_birth,
+            profile_expiration_date: result.profile_expiration_date,
             role: result.role,
           }
         : null;
