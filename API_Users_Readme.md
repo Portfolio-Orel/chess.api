@@ -1,4 +1,4 @@
-# Chess App API Documentation
+# Chess App Users API Documentation
 This documentation provides detailed information about the getUser, createUser, and updateUser endpoints of the Chess App API.
 
 ## `getUser` 

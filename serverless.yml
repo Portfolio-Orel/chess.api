@@ -129,10 +129,10 @@ functions:
     handler: src/api/rating.calculateNewRating
     events:
       - httpApi:
-          path: /calculation/newRating
+          path: /expectedRating/new
           method: post
   undo_rating:
-    handler: src/api/rating.undoLatestCalculation
+    handler: src/api/rating.undo
     events:
       - httpApi:
           path: /calculation/undo
