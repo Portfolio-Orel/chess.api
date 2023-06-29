@@ -19,6 +19,7 @@ const tables = {
   intervals: "intervals",
   users_roles: "users_roles",
   roles: "roles",
+  calculation_history: "calculation_history",
 };
 
 const urls = {

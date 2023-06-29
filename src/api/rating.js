@@ -1,30 +1,27 @@
+const { knex } = require("../common/request_wrapper");
 const { runRequest } = require("../common/request_wrapper");
 const { calculateRating } = require("../common/rating_calculator");
 const { toDate } = require("../utils/date");
+const { tables } = require("../common/constants");
+
 const PlayerNumberNotFoundError = require("../common/errors/player_number_not_found");
+const UserNotFound = require("../common/errors/user_not_found");
 
 const axios = require("axios");
 const cheerio = require("cheerio");
 
 require("dotenv").config();
 
-const calculateNewRating = async (req, context) =>
-  runRequest(req, context, async (_, user_id) => {
-    const { player, games } = req.body;
-    const newRating = await calculateRating(player, games);
-    return {
-      result: newRating
-    };
-  });
-
 const fetchRating = async (player_number) => {
   const chess_rating_url = process.env.CHESS_RATING_URL;
   const player_details = {};
-  const chess_rating_result = await axios.get(`${chess_rating_url}${player_number}`);
+  const chess_rating_result = await axios.get(
+    `${chess_rating_url}${player_number}`
+  );
   const html = chess_rating_result.data;
   const data = extractDataFromHTML(html);
   if (!data.rating_israel) {
-    throw new Error(`Player number ${player_number} was not found`);
+    throw new PlayerNumberNotFoundError();
   }
   if (data.rating_fide && data.rating_fide.length > 0) {
     player_details.rating_fide = data.rating_fide[0];
@@ -120,7 +117,89 @@ const extractDataFromHTML = (html) => {
   };
 };
 
+const calculateNewRating = async (req, context) =>
+  runRequest(req, context, async (_, user_id) => {
+    const { games } = req.body;
+    const user_rating = await knex(tables.chess_user_data)
+      .where({ user_id })
+      .select(["rating_expected", "rating_israel"])
+      .first();
+
+    if (!user_rating) {
+      throw new UserNotFound(`User ${user_id} was not found`);
+    }
+
+    const player = {
+      rating: user_rating.rating_expected ?? user_rating.rating_israel,
+    };
+    const new_rating = await calculateRating(player, games);
+    await knex.transaction(async (trx) => {
+      await trx(tables.calculation_history).insert({
+        user_id,
+        previous_rating: player.rating,
+        new_rating,
+      });
+
+      await trx(tables.chess_user_data).where({ user_id }).update({
+        rating_expected: new_rating,
+      });
+    });
+
+    return new_rating;
+  });
+
+const undoLatestCalculation = (req, context) =>
+  runRequest(req, context, async (_, user_id) => {
+    let latest_calculation_history = await knex.transaction(async (trx) => {
+      const latest_calculation_history = await trx(tables.calculation_history)
+        .where({ user_id })
+        .orderBy("created_at", "desc")
+        .where({ is_active: true })
+        .first();
+
+      if (!latest_calculation_history) {
+        return null;
+      }
+
+      await trx(tables.calculation_history)
+        .where({ id: latest_calculation_history.id })
+        .update({ is_active: false });
+
+      await trx(tables.chess_user_data).where({ user_id }).update({
+        rating_expected: latest_calculation_history.previous_rating,
+      });
+
+      return latest_calculation_history;
+    });
+
+    const previous_rating = latest_calculation_history.previous_rating;
+    return previous_rating;
+  });
+
+const resetExpectedRating = (req, context) =>
+  runRequest(req, context, async (_, user_id) => {
+    return await knex.transaction(async (trx) => {
+      const user_rating = await trx(tables.chess_user_data)
+        .where({ user_id })
+        .select(["rating_israel", "rating_expected"])
+        .first();
+
+      await trx(tables.chess_user_data)
+        .where({ user_id })
+        .update({ rating_expected: user_rating.rating_israel });
+
+      await trx(tables.calculation_history).insert({
+        user_id,
+        previous_rating: user_rating.rating_expected,
+        new_rating: user_rating.rating_israel,
+      });
+      return user_rating.rating_israel
+    });
+  });
+
 module.exports = {
   calculateNewRating,
   fetchRating,
+  undoLatestCalculation,
+  resetExpectedRating,
 };

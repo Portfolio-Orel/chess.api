@@ -136,9 +136,22 @@ functions:
     handler: src/api/rating.calculateNewRating
     events:
       - httpApi:
-          path: /newRating
+          path: /calculation/newRating
           method: post
-## Rating ##
+  undo_rating:
+    handler: src/api/rating.undoLatestCalculation
+    events:
+      - httpApi:
+          path: /calculation/undo
+          method: put
+
+  reset_rating:
+    handler: src/api/rating.resetExpectedRating
+    events:
+      - httpApi:
+          path: /calculation/reset
+          method: put
+  ## Rating ##
 
   ## Clubs ##
   get_all_clubs:

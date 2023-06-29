@@ -10,6 +10,7 @@ exports.up = function (knex) {
     table.boolean("is_profile_active").notNullable().defaultTo(false);
     table.string("player_number").unique().notNullable();
     table.integer("rating_israel").notNullable();
+    table.integer("rating_expected").notNullable();
     table.integer("rating_fide").defaultTo(0);
     table.string("player_number_fide").unique();
     table.boolean("is_active").defaultTo(true);

@@ -31,6 +31,7 @@ A JSON object containing the following user properties:
 - `date_of_birth` - The date of birth of the user.
 - `profile_expiration_date` - The expiration date of the user's profile.
 - `role` - The role of the user.
+- `is_registartion_complete` - A boolean value indicating whether the user has completed the registration process.
 
 ## `createUser`
 ## Purpose

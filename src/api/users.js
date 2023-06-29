@@ -6,7 +6,7 @@ const { toDate } = require("../utils/date");
 const logger = require("../common/logger");
 const clubs_mappping = require("../../clubs_map.json");
 
-const UserNumberNotFoundError = require("../common/errors/player_number_not_found");
+const UserNotFoundError = require("../common/errors/user_not_found");
 const ClubNotFoundError = require("../common/errors/club_not_found");
 
 const getUser = async (req, context) =>
@@ -42,8 +42,10 @@ const getUser = async (req, context) =>
             role: result.role,
           }
         : null;
-
       logger.info(`User ${user_id} was fetched`);
+      if (!user) {
+        throw new UserNotFoundError(`User ${user_id} was not found`);
+      }
       return user;
     },
     false
@@ -56,6 +58,7 @@ const createUser = (req, context) =>
 
     const gender_lower = gender.toLowerCase();
     const player_details = await fetchRating(player_number);
+    logger.info(`Player details: ${JSON.stringify(player_details)}`);
     const club_name_lower = player_details.club_name.toLowerCase();
     if (!clubs_mappping[club_name_lower]) {
       throw new ClubNotFoundError(
@@ -99,6 +102,7 @@ const createUser = (req, context) =>
         });
       }
     });
+    logger.info(`User ${user_id} was created`);
     return {
       id: user_id,
       gender,

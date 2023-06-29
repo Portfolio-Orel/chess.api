@@ -6,4 +6,5 @@ class PlayerNumberNotFoundError extends Error {
     this.code = 403;
   }
 }
+
 module.exports = PlayerNumberNotFoundError;
