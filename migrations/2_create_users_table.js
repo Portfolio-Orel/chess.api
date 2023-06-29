@@ -11,6 +11,7 @@ exports.up = function(knex) {
         table.string('last_name');
         table.string('gender');
         table.string('email');
+        table.string('notification_token');
         table.string('phone_number').notNullable().unique();
         table.timestamp('date_of_birth');
         table.boolean('is_active').defaultTo(true);

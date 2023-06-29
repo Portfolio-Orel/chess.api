@@ -31,7 +31,7 @@ const runRequest = async (req, context, request, check_club_id = false) => {
       body: JSON.stringify(result ? result : {}),
     };
   } catch (error) {
-    logger.error(error);
+    logger.error(JSON.stringify(error));
     console.log(error);
     return {
       statusCode: error.code ?? 500,

@@ -67,13 +67,6 @@ functions:
           path: /users/{user_id}
           method: put
 
-  complete_registration:
-    handler: src/api/users.completeRegistration
-    events:
-      - httpApi:
-          path: /users/completeRegistration
-          method: put
-
   is_registration_completed:
     handler: src/api/users.isRegistrationCompleted
     events:

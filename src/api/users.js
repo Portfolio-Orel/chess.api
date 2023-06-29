@@ -53,8 +53,14 @@ const getUser = async (req, context) =>
 
 const createUser = (req, context) =>
   runRequest(req, context, async (req, user_id) => {
-    const { email, phone_number, player_number, gender, date_of_birth } =
-      req.body;
+    const {
+      email,
+      phone_number,
+      player_number,
+      gender,
+      date_of_birth,
+      notification_token,
+    } = req.body;
 
     const gender_lower = gender.toLowerCase();
     const player_details = await fetchRating(player_number);
@@ -67,8 +73,10 @@ const createUser = (req, context) =>
     }
     let club_id;
     let club;
-    const result_club = await knex(tables.clubs)
-      .where("name", clubs_mappping[club_name_lower]);
+    const result_club = await knex(tables.clubs).where(
+      "name",
+      clubs_mappping[club_name_lower]
+    );
     if (result_club && result_club.length > 0) {
       club = result_club[0];
       club_id = result_club[0].id;
@@ -88,6 +96,7 @@ const createUser = (req, context) =>
         phone_number,
         date_of_birth: toDate(date_of_birth),
         is_registration_completed: true,
+        notification_token,
       });
       if (club_id && player_number) {
         await trx(tables.chess_user_data).insert({
@@ -123,36 +132,33 @@ const createUser = (req, context) =>
 
 const updateUser = (req, context) =>
   runRequest(req, context, async (req, user_id) => {
-    let { first_name, last_name, date_of_birth, gender } = req.body;
+    let { first_name, last_name, date_of_birth, gender, notification_token } =
+      req.body;
     date_of_birth = toDate(date_of_birth);
-    await knex(tables.users)
-      .update({
-        first_name,
-        last_name,
-        date_of_birth,
-        gender,
-      })
-      .where("id", user_id);
-  });
-
-const completeRegistration = (req, context) =>
-  runRequest(req, context, async (req, user_id) => {
-    let { first_name, last_name, player_number, club_id } = req.body;
     await knex.transaction(async (trx) => {
-      await trx(tables.users)
+      const user = await trx(tables.users).where("id", user_id).first();
+      if (!user) {
+        throw new UserNotFoundError(`User ${user_id} was not found`);
+      }
+      await knex(tables.users)
         .update({
-          first_name,
-          last_name,
-          is_registration_completed: true,
+          first_name: first_name ?? user.first_name,
+          last_name: last_name ?? user.last_name,
+          date_of_birth: date_of_birth ?? user.date_of_birth,
+          gender: gender ?? user.gender,
+          notification_token: notification_token ?? user.notification_token,
         })
-        .where({ id: user_id });
-      await trx(tables.chess_user_data).insert({
-        user_id,
-        player_number,
-        club_id,
-      });
+        .where("id", user_id);
     });
-    logger.info(`User ${user_id} completed registration`);
+    logger.info(`User ${user_id} was updated`);
+    return {
+      id: user_id,
+      first_name,
+      last_name,
+      date_of_birth,
+      gender,
+      notification_token,
+    };
   });
 
 const isRegistrationCompleted = (req, context) =>
