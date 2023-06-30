@@ -65,18 +65,20 @@ const createUser = (req, context) =>
     const gender_lower = gender.toLowerCase();
     const player_details = await fetchRating(player_number);
     logger.info(`Player details: ${JSON.stringify(player_details)}`);
-    const club_name_lower = player_details.club_name.toLowerCase();
-    if (!clubs_mappping[club_name_lower]) {
-      throw new ClubNotFoundError(
-        `Club ${player_details.club_name} was not found in mapping file`
-      );
+    let club_name = player_details.club_name.toLowerCase();
+    if (!clubs_mappping[club_name]) {
+      logger.warn(`Club ${club_name} was not found in map`);
+      await knex
+        .insert({ name: player_details.club_name })
+        .into(tables.clubs)
+        .onConflict("name")
+        .ignore();
+    } else {
+      club_name = clubs_mappping[club_name];
     }
     let club_id;
     let club;
-    const result_club = await knex(tables.clubs).where(
-      "name",
-      clubs_mappping[club_name_lower]
-    );
+    const result_club = await knex(tables.clubs).where("name", club_name);
     if (result_club && result_club.length > 0) {
       club = result_club[0];
       club_id = result_club[0].id;
@@ -108,6 +110,8 @@ const createUser = (req, context) =>
           rating_fide_rapid: player_details.rating_fide_rapid ?? 0,
           player_number,
           profile_expiration_date: player_details.profile_expiration_date,
+          year_of_birth: player_details.year_of_birth,
+          title: player_details.title,
         });
       }
     });
@@ -161,26 +165,34 @@ const updateUser = (req, context) =>
     };
   });
 
-const isRegistrationCompleted = (req, context) =>
-  runRequest(req, context, async (_, user_id) => {
-    try {
-      const { user_id } = req.pathParameters;
-      const result = await knex(tables.users)
-        .select("is_registration_completed")
-        .where("id", user_id)
-        .first();
-      return {
-        is_registration_completed: result.is_registration_completed,
-      };
-    } catch (error) {
-      return false;
-    }
+const searchUser = async (req, context) =>
+  runRequest(req, context, async (req, _) => {
+    const { search, page, limit } = req.queryStringParameters;
+    const offset = (page - 1) * limit;
+    // Search by name/last name, includes
+    const result = await knex(tables.users)
+      .where("first_name", "like", `%${search}%`)
+      .orWhere("last_name", "like", `%${search}%`)
+      .limit(limit)
+      .offset(offset)
+      .orderBy("first_name", "asc")
+      .orderBy("last_name", "asc")
+      .join(
+        tables.chess_user_data,
+        "users.id",
+        `${tables.chess_user_data}.user_id`
+      )
+      .select([
+        `${tables.users}.first_name`,
+        `${tables.users}.last_name`,
+        `${tables.chess_user_data}.rating_israel`,
+      ]);
+    return result;
   });
 
 module.exports = {
   getUser,
   createUser,
-  isRegistrationCompleted,
   updateUser,
-  completeRegistration,
+  searchUser,
 };

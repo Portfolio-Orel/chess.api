@@ -55,6 +55,9 @@ const fetchRating = async (player_number) => {
     player_details.first_name = firstName;
     player_details.last_name = lastName;
   }
+  if (data.title) {
+    player_details.title = data.title;
+  }
 
   return player_details;
 };
@@ -98,6 +101,7 @@ const extractDataFromHTML = (html) => {
     .text()
     .trim()
     .match(/\d+/);
+  const title = $('li:contains("דרגה בינלאומית")').find("span").text().trim();
   const year_of_birth = $('li:contains("שנת לידה")').text().trim().match(/\d+/);
   const profile_expiration_date = $('li:contains("תוקף כרטיס שחמטאי")')
     .text()
@@ -114,6 +118,7 @@ const extractDataFromHTML = (html) => {
     year_of_birth,
     profile_expiration_date,
     full_name,
+    title,
   };
 };
 
@@ -193,7 +198,7 @@ const resetExpectedRating = (req, context) =>
         previous_rating: user_rating.rating_expected,
         new_rating: user_rating.rating_israel,
       });
-      return user_rating.rating_israel
+      return user_rating.rating_israel;
     });
   });
 

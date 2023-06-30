@@ -67,12 +67,17 @@ functions:
           path: /users/{user_id}
           method: put
 
-  is_registration_completed:
-    handler: src/api/users.isRegistrationCompleted
+  search_users:
+    handler: src/api/users.searchUser
     events:
       - httpApi:
-          path: /users/{user_id}/isRegistrationCompleted
+          path: /users/
           method: get
+          parameters:
+            querystrings:
+              search: true
+              page: true
+              limit: true
 
   ## Users ##
 
