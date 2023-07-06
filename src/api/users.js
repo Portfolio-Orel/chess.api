@@ -16,10 +16,12 @@ const getUser = async (req, context) =>
     async (req, __) => {
       const user_id = req.pathParameters.user_id;
       const result = await knex(tables.users)
-        .select(`${tables.users}.*`, `${tables.roles}.name as role`)
-        .join()
-        .join(tables.users_roles, "users.id", `${tables.users_roles}.user_id`)
-        .join(tables.roles, "users_roles.role_id", `${tables.roles}.id`)
+        .select(`*`)
+        .join(
+          `${tables.chess_user_data}`,
+          `${tables.users}.id`,
+          `${tables.chess_user_data}.user_id`
+        )
         .where(`${tables.users}.id`, user_id)
         .where(`${tables.users}.is_active`, true)
         .first();

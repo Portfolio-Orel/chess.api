@@ -5,3 +5,5 @@ class UserNotFoundError extends Error {
       this.code = 403;
     }
   }
+
+ module.exports = UserNotFoundError;
