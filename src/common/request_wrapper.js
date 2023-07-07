@@ -35,7 +35,7 @@ const runRequest = async (req, context, request, check_club_id = false) => {
       statusCode: error.code ?? 500,
       body: JSON.stringify({
         error: error.message || "Request failed.",
-        result: result ? result : {},ה
+        result: result ? result : {},
       }),
     };
   }
