@@ -16,28 +16,26 @@ const knex = require("knex")({
 });
 const runRequest = async (req, context, request, check_club_id = false) => {
   let result = {};
+  let user_id = "";
   try {
-    const user_id = resolveUserId(req);
+    user_id = resolveUserId(req);
 
     context.callbackWaitsForEmptyEventLoop = false;
     req.body = JSON.parse(req.body ? req.body : "{}");
-    logger.info("api called", [
-      { request: `${request}`, user_id: `${user_id}`, body: req.body },
-    ]);
+    logger.info("api called", user_id, { request: `${request}` });
     result = await request(req, user_id);
-
     return {
       statusCode: result?.code ?? 200,
       body: JSON.stringify(result ? result : {}),
     };
   } catch (error) {
-    logger.error(JSON.stringify(error));
+    logger.error(`Request failed: ${JSON.stringify(error)}`, user_id);
     console.log(error);
     return {
       statusCode: error.code ?? 500,
       body: JSON.stringify({
         error: error.message || "Request failed.",
-        result: result ? result : {},
+        result: result ? result : {},ה
       }),
     };
   }
@@ -46,19 +44,18 @@ const runRequest = async (req, context, request, check_club_id = false) => {
 const resolveUserId = (req) => {
   const { UserId } = req.headers;
   const { userid } = req.headers;
-  // if (!UserId && !userid) {
-  //   throw Error("Did you add UserId to the headers?");
-  // }
+  if (!UserId && !userid) {
+    throw Error("Did you add UserId to the headers?");
+  }
   const regexExpUUID =
     /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/gi;
-  return UserId ? UserId : userid;
-  // if (regexExpUUID.test(UserId)) {
-  //   return UserId;
-  // } else if (regexExpUUID.test(userid)) {
-  //   return userid;
-  // } else {
-  //   throw Error("userId is not a uuid.");
-  // }
+  if (regexExpUUID.test(UserId)) {
+    return UserId;
+  } else if (regexExpUUID.test(userid)) {
+    return userid;
+  } else {
+    throw Error("userId is not a uuid.");
+  }
 };
 
 /* Knex Debugging */

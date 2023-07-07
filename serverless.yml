@@ -70,15 +70,15 @@ functions:
   search_users:
     handler: src/api/users.searchUser
     events:
-      - httpApi:
+       - http:
           path: /users/
-          method: get
-          parameters:
-            querystrings:
-              search: true
-              page: true
-              limit: true
-
+          method: GET
+          request:
+            parameters:
+              querystrings:
+                search: true
+                page: true
+                limit: true
   ## Users ##
 
   ## Events ##

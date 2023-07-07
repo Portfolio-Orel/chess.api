@@ -44,7 +44,6 @@ const getUser = async (req, context) =>
             role: result.role,
           }
         : null;
-      logger.info(`User ${user_id} was fetched`);
       if (!user) {
         throw new UserNotFoundError(`User ${user_id} was not found`);
       }
@@ -66,10 +65,10 @@ const createUser = (req, context) =>
 
     const gender_lower = gender.toLowerCase();
     const player_details = await fetchRating(player_number);
-    logger.info(`Player details: ${JSON.stringify(player_details)}`);
+    logger.info(`Player details: ${JSON.stringify(player_details)}`, user_id);
     let club_name = player_details.club_name.toLowerCase();
     if (!clubs_mappping[club_name]) {
-      logger.warn(`Club ${club_name} was not found in map`);
+      logger.warn(`Club ${club_name} was not found in map`, user_id);
       await knex
         .insert({ name: player_details.club_name })
         .into(tables.clubs)
@@ -117,7 +116,7 @@ const createUser = (req, context) =>
         });
       }
     });
-    logger.info(`User ${user_id} was created`);
+    logger.info(`User ${user_id} was created`, user_id);
     return {
       id: user_id,
       gender,
@@ -156,7 +155,7 @@ const updateUser = (req, context) =>
         })
         .where("id", user_id);
     });
-    logger.info(`User ${user_id} was updated`);
+    logger.info(`User ${user_id} was updated`, user_id);
     return {
       id: user_id,
       first_name,

@@ -1,11 +1,9 @@
 const { runRequest } = require("../common/request_wrapper");
 const { tables } = require("../common/constants");
 const { knex } = require("../common/request_wrapper");
-const logger = require("../common/logger");
 
 const getIntervals = async (req, context) =>
   runRequest(req, context, async (_, user_id) => {
-    logger.info("Getting intervals");
     const result = await knex
       .select()
       .from(tables.intervals)

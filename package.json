@@ -17,6 +17,7 @@
         "cheerio": "^1.0.0-rc.12",
         "crypto-secure-random-digit": "^1.0.10",
         "dotenv": "^16.0.3",
+        "graceful-fs": "^4.2.11",
         "knex": "^2.2.0",
         "pg": "^8.9.0",
         "reflect-metadata": "^0.1.13",
